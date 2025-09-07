@@ -1,0 +1,47 @@
+{
+  "meta": {
+    "pdf": "carrier_kits/TOP/template.pdf"
+  },
+  "text": {
+    "subscriber_name": [],
+    "birth": [],
+    "gender_cb": [],
+    "subscriber_phone": [],
+    "wish4": [],
+    "port_number": [],
+    "prev_carrier": [],
+    "mvno_name": [],
+    "addr_line1": [],
+    "plan": [],
+    "apply_date": [
+      {
+        "p": 1,
+        "x": 400,
+        "y": 100,
+        "size": 10,
+        "font": "MalgunGothic"
+      }
+    ],
+    "autopay_holder": [],
+    "autopay_birth": [],
+    "autopay_org": [],
+    "autopay_number": [],
+    "autopay_exp": [],
+    "sim_serial": []
+  },
+  "checkbox": {
+    "join_type.new": [],
+    "join_type.port": [],
+    "intl_block.true": []
+  },
+  "lines": [
+    {
+      "p": 1,
+      "x1": 395,
+      "y1": 98,
+      "x2": 560,
+      "y2": 98,
+      "w": 0.8
+    }
+  ]
+}
