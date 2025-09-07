@@ -1,6 +1,7 @@
 [build]
 publish = "."
+command = ""          # 빌드 커맨드 없음(정적 사이트)
 
 [functions]
 directory = "netlify/functions"
-node_bundler = "esbuild"   # 권장
+node_bundler = "esbuild"
