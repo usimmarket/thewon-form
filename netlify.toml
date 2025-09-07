@@ -1,7 +1,12 @@
+# netlify.toml
 [build]
-publish = "."
-command = ""          # 빌드 커맨드 없음(정적 사이트)
+  publish   = "."
+  functions = "netlify/functions"
 
 [functions]
-directory = "netlify/functions"
-node_bundler = "esbuild"
+  node_bundler = "esbuild"
+  included_files = [
+    "template.pdf",
+    "malgun.ttf",
+    "netlify/functions/mappings/**"
+  ]
