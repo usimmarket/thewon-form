@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>PDF 1:1 좌표 매핑 스튜디오 v3.3 (Batch Offset)</title>
+<style>
+  :root{--bg:#0b1220;--panel:#0a1628;--card:#0e1a2e;--line:#153a59;--accent:#38bdf8;--text:#e5f2ff;--muted:#9fb4cf;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:13px/1.55 system-ui,Segoe UI,Roboto,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif}
+  header{position:sticky;top:0;z-index:6;display:flex;gap:12px;align-items:center;padding:10px 12px;background:#07101c;border-bottom:1px solid #0b2540}
+  h1{font-size:15px;margin:0}
+  .grid{display:grid;grid-template-columns:360px 1fr 360px;min-height:calc(100vh - 48px)}
+  aside, aside.right{padding:12px;border-right:1px solid #0b2540;background:linear-gradient(180deg,#0b1220,#0a0f1a);overflow:auto}
+  aside.right{border-left:1px solid #0b2540;border-right:none}
+  main{position:relative;overflow:auto}
+  .card{background:#0e1a2e;border:1px solid #153a59;border-radius:12px;padding:10px;margin:0 0 12px 0}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  input[type="text"],input[type="number"],input[type="file"],select,textarea{background:#091627;border:1px solid #143252;color:var(--text);border-radius:8px;padding:6px 8px}
+  input[type="number"]{width:100px}
+  textarea{width:100%;min-height:72px}
+  button{background:#0f2742;border:1px solid #21466e;color:#e6f6ff;border-radius:10px;padding:8px 10px;cursor:pointer;font-size:12px}
+  button.primary{background:#0ea5e9;border-color:#36bffa;color:#01131e}
+  .list{max-height:220px;overflow:auto;border:1px solid #153a59;border-radius:10px;padding:6px}
+  .pill{display:flex;gap:6px;align-items:center;border:1px dashed #2a517b;background:#091a2d;color:#d7eeff;padding:4px 6px;border-radius:999px;font-size:11px;margin:3px 3px 0 0}
+  .pill small{opacity:.7}
+  .toolbar{position:sticky; top:0; z-index:5; display:flex; gap:10px; align-items:center; padding:8px 12px; background:#07101c; border-bottom:1px solid #0b2540}
+  .stage{position:relative;padding:12px}
+  canvas{display:block;background:#fff;box-shadow:0 0 0 1px #0b2540;margin-top:16px}
+  .pin{position:absolute;pointer-events:none;background:#004e78;color:#e6f6ff;border:1px solid #5cc8ff;border-radius:8px;padding:2px 6px;font-size:11px;transform:translate(-50%,-100%);white-space:nowrap}
+  .pin.sel{background:#0ea5e9;color:#00111c;border-color:#8be4ff}
+  .cross{position:absolute;pointer-events:none;border-left:1px solid #ef4444;border-top:1px solid #ef4444;width:22px;height:22px;transform:translate(-11px,-11px)}
+  .err{background:#3b1d1d;border:1px solid #7a2b2b;color:#ffdcdc;padding:8px;border-radius:8px;margin:8px 0;display:none;white-space:pre-wrap}
+  .muted{color:#9fb4cf;font-size:12px}
+  .kbd{display:inline-block;border:1px solid #2a517b;background:#0d2745;padding:0 6px;border-radius:6px;margin-left:6px}
+  .seg{display:inline-flex;border:1px solid #2a517b;border-radius:10px;overflow:hidden}
+  .seg button{border:0;background:#0d2745;padding:6px 10px}
+  .seg button.on{background:#38bdf8;color:#01131e}
+  .note{font-size:12px;color:#a8c3df}
+</style>
+</head>
+<body>
+<header>
+  <h1>PDF 1:1 좌표 매핑 스튜디오 v3.3</h1>
+  <div class="muted">· 1pt = 1px · PDF 좌표 그대로 · ↑↓←→ 미세 이동 <span class="kbd">1pt</span></div>
+</header>
+
+<div class="grid">
+  <!-- LEFT -->
+  <aside>
+    <div class="card">
+      <div><b>PDF 불러오기</b></div>
+      <div class="row" style="margin-top:6px">
+        <input id="pdfUrl" type="text" placeholder="/template.pdf" value="/template.pdf" style="flex:1">
+        <button id="btnLoadUrl" class="primary">URL</button>
+      </div>
+      <div class="row">
+        <input id="pdfFile" type="file" accept="application/pdf" style="flex:1">
+        <button id="btnLoadFile">로컬</button>
+      </div>
+      <div id="errPdf" class="err"></div>
+    </div>
+
+    <div class="card">
+      <div><b>index.html 불러오기 → 필드 목록</b></div>
+      <div class="row" style="margin-top:6px">
+        <input id="htmlUrl" type="text" placeholder="/index.html" style="flex:1">
+        <button id="btnHtmlUrl">URL</button>
+      </div>
+      <div class="row">
+        <input id="htmlFile" type="file" accept=".html,text/html" style="flex:1">
+        <button id="btnHtmlFile">로컬</button>
+      </div>
+      <div class="muted">input/select/textarea 의 name을 자동 수집</div>
+      <div id="errHtml" class="err"></div>
+      <div class="list" id="fieldList"></div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <b>모드</b>
+        <div class="seg">
+          <button id="modeText" class="on">텍스트</button>
+          <button id="modeV">체크박스</button>
+          <button id="modeFix">고정라벨</button>
+        </div>
+      </div>
+      <div id="panelText">
+        <div class="row" style="margin-top:6px">
+          <label>page</label><input id="page" type="number" value="1">
+          <label>size</label><input id="size" type="number" value="10">
+        </div>
+        <div class="row">
+          <label>key</label><input id="key" type="text" placeholder="필드명 혹은 자유 입력" style="flex:1">
+          <button id="arm" class="primary">캔버스 클릭으로 좌표 찍기</button>
+        </div>
+        <div class="row">
+          <label>X</label><input id="selX" type="number">
+          <label>Y</label><input id="selY" type="number">
+          <button id="applyXY">적용</button>
+        </div>
+        <div class="row">
+          <button id="nUp">↑</button><button id="nDn">↓</button>
+          <button id="nLt">←</button><button id="nRt">→</button>
+          <div class="muted">선택 핀을 1pt 이동</div>
+        </div>
+        <div class="row">
+          <button id="btnDelete">선택 삭제</button>
+          <button id="btnDup">선택 복제</button>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:8px">
+        <button id="export">JSON 내보내기</button>
+        <input id="fileJson" type="file" accept=".json" style="display:none">
+        <button id="import">가져오기</button>
+      </div>
+
+      <div style="margin-top:8px"><b>텍스트 핀 목록(전체 페이지)</b> <span class="muted">· 캔버스는 현재 페이지만 표시</span></div>
+      <div id="listTextPins" class="list"></div>
+    </div>
+
+    <div class="card">
+      <div><b>일괄 오프셋(Δx/Δy)</b> <span class="muted">단위: cm 또는 pt</span></div>
+      <div class="row" style="margin-top:6px">
+        <label>ΔX(cm)</label><input id="dx_cm" type="number" step="0.1" value="0">
+        <label>ΔY(cm)</label><input id="dy_cm" type="number" step="0.1" value="0">
+      </div>
+      <div class="row">
+        <label>ΔX(pt)</label><input id="dx_pt" type="number" step="0.5" value="0">
+        <label>ΔY(pt)</label><input id="dy_pt" type="number" step="0.5" value="0">
+      </div>
+      <div class="note">+X → 오른쪽, +Y → 아래쪽 · “위로/왼쪽” 이동은 음수 사용</div>
+      <div class="row" style="margin-top:6px">
+        <button id="applyOffsetAll" class="primary">전체 핀에 적용</button>
+        <button id="applyOffsetThisPage">이 페이지 핀만 적용</button>
+        <button id="undoOffset">실행 취소</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- CENTER -->
+  <main>
+    <div class="toolbar">
+      <button id="prev">◀ 이전</button>
+      <div id="pageInfo">Page 0 / 0</div>
+      <button id="next">다음 ▶</button>
+      <div style="flex:1"></div>
+      <label class="muted"><input id="showOnlyThisPage" type="checkbox" checked> 이 페이지 핀만 표시(캔버스)</label>
+      <div>좌표: <span id="cursor">- , -</span></div>
+    </div>
+    <div id="stage" class="stage">
+      <canvas id="canvas" width="595" height="842"></canvas>
+      <div id="cross" class="cross" style="display:none"></div>
+    </div>
+  </main>
+
+  <!-- RIGHT -->
+  <aside class="right">
+    <div class="card">
+      <div><b>체크박스(vmap)</b> <span class="muted">목록은 전체 페이지</span></div>
+      <div class="row" style="margin-top:6px">
+        <label>opt</label><input id="optKey" type="text" placeholder="예: join_type:new" style="flex:1">
+      </div>
+      <div class="row">
+        <label>x</label><input id="optX" type="number">
+        <label>y</label><input id="optY" type="number">
+        <label>size</label><input id="optSize" type="number" value="11">
+        <label>page</label><input id="optPage" type="number" value="1">
+      </div>
+      <div class="row">
+        <button id="addOpt">추가</button>
+        <button id="listOpt">목록</button>
+      </div>
+      <div id="listVmap" class="list" style="margin-top:6px"></div>
+    </div>
+
+    <div class="card">
+      <div><b>고정 라벨 (fixed_flags)</b> <span class="muted">목록은 전체 페이지</span></div>
+      <div class="row" style="margin-top:6px">
+        <label>label</label><input id="fixLabel" type="text" placeholder="국제전화차단/로밍차단" style="flex:1">
+      </div>
+      <div class="row">
+        <label>x</label><input id="fixX" type="number">
+        <label>y</label><input id="fixY" type="number">
+        <label>size</label><input id="fixSize" type="number" value="10">
+        <label>page</label><input id="fixPage" type="number" value="1">
+      </div>
+      <div class="row">
+        <button id="addFix">추가</button>
+        <button id="listFix">목록</button>
+      </div>
+      <div id="listFixes" class="list" style="margin-top:6px"></div>
+    </div>
+  </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>if (window['pdfjsLib']) { pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"; }</script>
+
+<script>
+(function(){
+  let pdfDoc=null, curPage=0, total=0;
+  const c=document.getElementById('canvas'), ctx=c.getContext('2d'), stage=document.getElementById('stage');
+  const cursor=document.getElementById('cursor'), cross=document.getElementById('cross');
+  const pins=[]; /* {type:'text'|'v'|'fix', key?, label?, x,y,size,page} */
+  let armed=false, selectedIndex=-1;
+  let mode='text'; // 'text' | 'v' | 'fix'
+  const undoStack=[];
+
+  const $=s=>document.querySelector(s);
+  const $$=(s)=>Array.from(document.querySelectorAll(s));
+  const showOnlyThisPageEl=$("#showOnlyThisPage");
+
+  const PT_PER_CM = 72/2.54;
+
+  function setInfo(){ $("#pageInfo").textContent=`Page ${curPage} / ${total}`; }
+
+  function errBox(id,msg){ const el=$(id); el.style.display='block'; el.textContent=String(msg||'Unknown error'); console.error(msg); }
+  function clearErr(id){ const el=$(id); el.style.display='none'; el.textContent=''; }
+
+  function setMode(m){
+    mode=m;
+    $("#modeText").classList.toggle('on', m==='text');
+    $("#modeV").classList.toggle('on', m==='v');
+    $("#modeFix").classList.toggle('on', m==='fix');
+    $("#panelText").style.display = (m==='text') ? '' : 'none';
+  }
+  $("#modeText").addEventListener('click',()=>setMode('text'));
+  $("#modeV").addEventListener('click',()=>setMode('v'));
+  $("#modeFix").addEventListener('click',()=>setMode('fix'));
+
+  async function loadPdfFromUrl(url){
+    try{
+      clearErr('#errPdf');
+      const loading=window['pdfjsLib'].getDocument({url});
+      pdfDoc=await loading.promise; total=pdfDoc.numPages; curPage=1; await render(curPage); setInfo();
+    }catch(e){ errBox('#errPdf','PDF URL 로드 실패: '+(e&&e.message?e.message:e)); }
+  }
+  async function loadPdfFromFile(file){
+    try{
+      clearErr('#errPdf');
+      const buf=new Uint8Array(await file.arrayBuffer());
+      const loading=window['pdfjsLib'].getDocument({data:buf});
+      pdfDoc=await loading.promise; total=pdfDoc.numPages; curPage=1; await render(curPage); setInfo();
+    }catch(e){ errBox('#errPdf','로컬 PDF 로드 실패: '+(e&&e.message?e.message:e)); }
+  }
+  async function render(n){
+    try{
+      if(!pdfDoc) return;
+      const p=await pdfDoc.getPage(n);
+      const vp=p.getViewport({scale:1});
+      c.width=Math.round(vp.width); c.height=Math.round(vp.height);
+      await p.render({canvasContext:ctx,viewport:vp}).promise;
+      drawPins();
+    }catch(e){ errBox('#errPdf','렌더링 오류: '+(e&&e.message?e.message:e)); }
+  }
+
+  // ✅ 목록/캔버스에서 공통 선택 처리
+  function selectPin(idx){
+    const p = pins[idx];
+    if (!p) return;
+    selectedIndex = idx;
+
+    if (p.page !== curPage && pdfDoc) {
+      curPage = p.page;
+      render(curPage).then(()=>fillInputs(p));
+      setInfo();
+      return;
+    }
+    fillInputs(p);
+    drawPins();
+  }
+  function fillInputs(p){
+    $("#selX").value = p.x;
+    $("#selY").value = p.y;
+    $("#page").value = p.page;
+    $("#size").value = p.size;
+
+    if (p.type === 'text') {
+      $("#key").value = p.key || '';
+    } else if (p.type === 'v') {
+      $("#optKey").value  = p.key || '';
+      $("#optX").value    = p.x;
+      $("#optY").value    = p.y;
+      $("#optSize").value = p.size || 11;
+      $("#optPage").value = p.page || 1;
+    } else if (p.type === 'fix') {
+      $("#fixLabel").value = p.label || '';
+      $("#fixX").value     = p.x;
+      $("#fixY").value     = p.y;
+      $("#fixSize").value  = p.size || 10;
+      $("#fixPage").value  = p.page || 1;
+    }
+  }
+
+  function drawPins(){
+    stage.querySelectorAll('.pin').forEach(n=>n.remove());
+    const only=showOnlyThisPageEl.checked;
+    pins.forEach((p,i)=>{
+      if(only && p.page!==curPage) return;
+      const el=document.createElement('div'); el.className='pin'+(i===selectedIndex?' sel':'');
+
+      el.style.left=p.x+'px'; el.style.top=p.y+'px';
+      el.textContent = p.type==='v' ? `✓ ${p.key}` :
+                       p.type==='fix' ? `[${p.label}]` :
+                       `${p.key}`;
+      stage.appendChild(el);
+    });
+    renderLists();
+  }
+
+  c.addEventListener('mousemove',e=>{
+    const r=c.getBoundingClientRect(); const x=Math.round(e.clientX-r.left), y=Math.round(e.clientY-r.top);
+    cursor.textContent=`${x}, ${y}`; cross.style.left=x+'px'; cross.style.top=y+'px'; cross.style.display='block';
+  });
+  c.addEventListener('mouseleave',()=>cross.style.display='none');
+
+  // Placement uses current visible page (curPage)
+  c.addEventListener('click',e=>{
+    if(!armed) return;
+    const r=c.getBoundingClientRect(); const x=Math.round(e.clientX-r.left), y=Math.round(e.clientY-r.top);
+    const page = curPage || 1;
+    let size=10, pin=null;
+    if(mode==='text'){
+      size=+($("#size").value||10);
+      const key=$("#key").value.trim()||'field';
+      pin={type:'text', key, x,y,size,page};
+    }else if(mode==='v'){
+      size=+($("#optSize").value||11);
+      const opt=$("#optKey").value.trim(); if(!opt){ alert('체크박스 opt (예: join_type:new)를 입력하세요.'); return; }
+      pin={type:'v', key:opt, x,y,size,page};
+    }else{
+      size=+($("#fixSize").value||10);
+      const label=$("#fixLabel").value.trim(); if(!label){ alert('고정 라벨 텍스트를 입력하세요.'); return; }
+      pin={type:'fix', label, x,y,size,page};
+    }
+    pins.push(pin);
+    selectedIndex=pins.length-1;
+    $("#selX").value=x; $("#selY").value=y;
+    $("#page").value=page; $("#size").value=size;
+    if(mode==='v'){ $("#optPage").value=page; $("#optSize").value=size; }
+    if(mode==='fix'){ $("#fixPage").value=page; $("#fixSize").value=size; }
+    armed=false; $("#arm").textContent='캔버스 클릭으로 좌표 찍기';
+    drawPins();
+  });
+
+  // 가까운 핀 선택 (캔버스 클릭 시)
+  stage.addEventListener('click',e=>{
+    const r=c.getBoundingClientRect(); const x=Math.round(e.clientX-r.left), y=Math.round(e.clientY-r.top);
+    let best=-1, bestD=Infinity;
+    pins.forEach((p,i)=>{ const dx=p.x-x, dy=p.y-y; const d=dx*dx+dy*dy; if(d<bestD){best=i; bestD=d;} });
+    if(best>=0){ selectPin(best); }
+  }, true);
+
+  // Nudge & apply
+  function nudge(dx,dy){ if(selectedIndex<0) return; const p=pins[selectedIndex]; p.x+=dx; p.y+=dy; $("#selX").value=p.x; $("#selY").value=p.y; drawPins(); }
+  $("#nUp").addEventListener('click',()=>nudge(0,-1)); $("#nDn").addEventListener('click',()=>nudge(0,1));
+  $("#nLt").addEventListener('click',()=>nudge(-1,0)); $("#nRt").addEventListener('click',()=>nudge(1,0));
+  window.addEventListener('keydown',e=>{ if(e.key==='ArrowUp') nudge(0,-1); if(e.key==='ArrowDown') nudge(0,1); if(e.key==='ArrowLeft') nudge(-1,0); if(e.key==='ArrowRight') nudge(1,0); });
+  $("#applyXY").addEventListener('click',()=>{ if(selectedIndex<0) return; const p=pins[selectedIndex];
+    p.x=+($("#selX").value||p.x);
+    p.y=+($("#selY").value||p.y);
+    p.page=+($("#page").value||p.page);
+    p.size=+($("#size").value||p.size);
+    if(p.type==='text'){ p.key=$("#key").value||p.key; }
+    drawPins();
+  });
+
+  $("#btnDelete").addEventListener('click',()=>{ if(selectedIndex<0) return; pins.splice(selectedIndex,1); selectedIndex=-1; drawPins(); });
+  $("#btnDup").addEventListener('click',()=>{ if(selectedIndex<0) return; const p=pins[selectedIndex]; pins.push({...p}); drawPins(); });
+
+  // --- 목록 렌더(목록 클릭 → 선택/이동/동기화) ---
+  function renderLists(){
+    const el=$("#listTextPins"); el.innerHTML='';
+    pins.forEach((p,i)=>{
+      if(p.type!=='text') return;
+      const div=document.createElement('div'); div.className='pill';
+      div.innerHTML=`<span>${p.key}</span> <small>@(${p.x},${p.y}) p${p.page}</small>`;
+      div.tabIndex = 0;
+      div.addEventListener('click', ()=>selectPin(i));
+      div.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ') selectPin(i); });
+      el.appendChild(div);
+    });
+    renderVmapList(); renderFixList();
+  }
+  function renderVmapList(){
+    const el=$("#listVmap"); el.innerHTML='';
+    pins.forEach((p,i)=>{
+      if(p.type!=='v') return;
+      const d=document.createElement('div'); d.className='pill';
+      d.innerHTML=`<span>${p.key}</span> <small>@(${p.x},${p.y}) p${p.page}</small>`;
+      d.tabIndex = 0;
+      d.addEventListener('click', ()=>selectPin(i));
+      d.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ') selectPin(i); });
+      el.appendChild(d);
+    });
+  }
+  function renderFixList(){
+    const el=$("#listFixes"); el.innerHTML='';
+    pins.forEach((p,i)=>{
+      if(p.type!=='fix') return;
+      const d=document.createElement('div'); d.className='pill';
+      d.innerHTML=`<span>[${p.label}]</span> <small>@(${p.x},${p.y}) p${p.page}</small>`;
+      d.tabIndex = 0;
+      d.addEventListener('click', ()=>selectPin(i));
+      d.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ') selectPin(i); });
+      el.appendChild(d);
+    });
+  }
+
+  // --- JSON I/O ---
+  $("#import").addEventListener('click',()=>$("#fileJson").click());
+  $("#fileJson").addEventListener('change', async e=>{
+    const f=e.target.files[0]; if(!f) return;
+    try{
+      const text=await f.text(); const obj=JSON.parse(text);
+      pins.length=0;
+      if(obj.fields){ for(const [k,v] of Object.entries(obj.fields)){
+        const base=(v.source && v.source[0]) || k.replace(/_p\d+(_\d+)?$/,'');
+        pins.push({type:(v.type==='fixed'?'fix':'text'), key:base, x:+v.x, y:+v.y, size:+(v.size||10), page:+(v.page||1)});
+      }}
+      if(obj.vmap){ for(const [k,v] of Object.entries(obj.vmap)){
+        pins.push({type:'v', key:k, x:+v.x, y:+v.y, size:+(v.size||11), page:+(v.page||1)});
+      }}
+      if(obj.fixed_flags && obj.fixed_flags.intl_roaming_block){
+        for(const v of obj.fixed_flags.intl_roaming_block){
+          pins.push({type:'fix', label:v.label||'국제전화차단/로밍차단', x:+v.x, y:+v.y, size:+(v.size||10), page:+(v.page||1)});
+        }
+      }
+      alert('가져오기 완료'); drawPins();
+    }catch(e){ errBox('#errPdf','JSON 파싱 오류: '+(e&&e.message?e.message:e)); }
+  });
+
+  $("#export").addEventListener('click',()=>{
+    const fields={}, vmap={}, fixed={intl_roaming_block:[]};
+    let tIndex=1;
+    pins.forEach((p)=>{
+      if(p.type==='v') vmap[p.key]={x:p.x,y:p.y,size:p.size,page:p.page};
+      else if(p.type==='fix') fixed.intl_roaming_block.push({label:p.label||'국제전화차단/로밍차단',x:p.x,y:p.y,size:p.size,page:p.page});
+      else { const key=`${(p.key||'field')}_p${p.page}_${tIndex++}`; fields[key]={x:p.x,y:p.y,size:p.size,page:p.page,source:[p.key||'field'],type:'text'}; }
+    });
+    const json={ fields, vmap, fixed_flags: fixed };
+    const blob=new Blob([JSON.stringify(json,null,2)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='KT_mapping_legacy_names.json'; a.click();
+  });
+
+  // --- index.html 로더 ---
+  window.buildFieldListFromHtml = function(htmlText){
+    const parser=new DOMParser();
+    const doc=parser.parseFromString(htmlText,'text/html');
+    const names=new Set();
+    doc.querySelectorAll('input[name], select[name], textarea[name]').forEach(el=>{ const nm=el.getAttribute('name'); if(nm) names.add(nm); });
+    const list=$("#fieldList"); list.innerHTML='';
+    if(!names.size){ list.innerHTML='<div class="muted">name을 가진 입력 항목이 없습니다.</div>'; return; }
+    Array.from(names).sort().forEach(nm=>{
+      const row=document.createElement('div'); row.className='row';
+      const btn=document.createElement('button'); btn.textContent='+'; btn.title='이 키로 좌표 찍기(텍스트 모드)';
+      btn.addEventListener('click',()=>{
+        setMode('text'); $("#key").value=nm; $("#page").value=(curPage||1); $("#size").value=10;
+        const arm=$("#arm"); if(arm){ arm.click(); }
+      });
+      const lab=document.createElement('div'); lab.textContent=nm; lab.style.flex='1';
+      row.appendChild(btn); row.appendChild(lab); list.appendChild(row);
+    });
+  };
+
+  $("#btnHtmlUrl").addEventListener('click',async ()=>{
+    const url=$("#htmlUrl").value; if(!url) return alert('index.html URL을 입력하세요.');
+    try{
+      clearErr('#errHtml');
+      const res=await fetch(url); if(!res.ok) throw new Error('HTTP '+res.status);
+      const text=await res.text(); buildFieldListFromHtml(text);
+    }catch(e){ errBox('#errHtml','index.html URL 로드 실패: '+(e&&e.message?e.message:e)); }
+  });
+  $("#btnHtmlFile").addEventListener('click',async ()=>{
+    const f=$("#htmlFile").files[0]; if(!f) return alert('index.html 파일을 선택하세요.');
+    try{
+      clearErr('#errHtml');
+      const text=await f.text(); buildFieldListFromHtml(text);
+    }catch(e){ errBox('#errHtml','index.html 로컬 로드 실패: '+(e&&e.message?e.message:e)); }
+  });
+
+  // --- 체크박스/고정라벨 '추가' 버튼 동작 ---
+  const addOptBtn = document.getElementById('addOpt');
+  if(addOptBtn){
+    addOptBtn.addEventListener('click', ()=>{
+      const opt = document.getElementById('optKey').value.trim();
+      const x = +document.getElementById('optX').value;
+      const y = +document.getElementById('optY').value;
+      const size = +document.getElementById('optSize').value || 11;
+      const page = +document.getElementById('optPage').value || (curPage||1);
+      if(!opt) return alert('체크박스 opt (예: join_type:new)을 입력하세요.');
+      if(Number.isNaN(x) || Number.isNaN(y)) return alert('x,y 좌표를 입력하세요.');
+      pins.push({type:'v', key:opt, x,y,size,page});
+      selectedIndex = pins.length-1;
+      drawPins(); renderVmapList();
+    });
+    const listOptBtn = document.getElementById('listOpt');
+    if(listOptBtn){ listOptBtn.addEventListener('click', renderVmapList); }
+  }
+  const addFixBtn = document.getElementById('addFix');
+  if(addFixBtn){
+    addFixBtn.addEventListener('click', ()=>{
+      const label = document.getElementById('fixLabel').value.trim();
+      const x = +document.getElementById('fixX').value;
+      const y = +document.getElementById('fixY').value;
+      const size = +document.getElementById('fixSize').value || 10;
+      const page = +document.getElementById('fixPage').value || (curPage||1);
+      if(!label) return alert('고정 라벨 텍스트를 입력하세요.');
+      if(Number.isNaN(x) || Number.isNaN(y)) return alert('x,y 좌표를 입력하세요.');
+      pins.push({type:'fix', label,x,y,size,page});
+      selectedIndex = pins.length-1;
+      drawPins(); renderFixList();
+    });
+    const listFixBtn = document.getElementById('listFix');
+    if(listFixBtn){ listFixBtn.addEventListener('click', renderFixList); }
+  }
+
+  // --- 오프셋 동기화(cm <-> pt) ---
+  const dx_cm = $("#dx_cm"), dy_cm = $("#dy_cm"), dx_pt = $("#dx_pt"), dy_pt = $("#dy_pt");
+  function syncFromCm(){
+    dx_pt.value = (parseFloat(dx_cm.value||0) * PT_PER_CM).toFixed(2);
+    dy_pt.value = (parseFloat(dy_cm.value||0) * PT_PER_CM).toFixed(2);
+  }
+  function syncFromPt(){
+    dx_cm.value = (parseFloat(dx_pt.value||0) / PT_PER_CM).toFixed(2);
+    dy_cm.value = (parseFloat(dy_pt.value||0) / PT_PER_CM).toFixed(2);
+  }
+  dx_cm.addEventListener('input', syncFromCm); dy_cm.addEventListener('input', syncFromCm);
+  dx_pt.addEventListener('input', syncFromPt); dy_pt.addEventListener('input', syncFromPt);
+
+  function snapshot(){ undoStack.push(JSON.parse(JSON.stringify(pins))); if(undoStack.length>20) undoStack.shift(); }
+  function applyOffset(filterFn){
+    const dx = parseFloat(dx_pt.value||0);
+    const dy = parseFloat(dy_pt.value||0);
+    if(!dx && !dy) return;
+    snapshot();
+    pins.forEach(p=>{ if(!filterFn || filterFn(p)){ p.x = +(p.x + dx).toFixed(2); p.y = +(p.y + dy).toFixed(2);} });
+    drawPins();
+  }
+  $("#applyOffsetAll").addEventListener('click', ()=>applyOffset(null));
+  $("#applyOffsetThisPage").addEventListener('click', ()=>applyOffset(p=>p.page===curPage));
+  $("#undoOffset").addEventListener('click', ()=>{ if(!undoStack.length) return; const last=undoStack.pop(); pins.length=0; last.forEach(p=>pins.push(p)); drawPins(); });
+
+  // Toolbar
+  $("#btnLoadUrl").addEventListener('click',()=>loadPdfFromUrl($("#pdfUrl").value||'/template.pdf'));
+  $("#btnLoadFile").addEventListener('click',()=>{ const f=$("#pdfFile").files[0]; if(!f) return alert('PDF 파일을 선택하세요.'); loadPdfFromFile(f); });
+  $("#arm").addEventListener('click',()=>{ armed=!armed; $("#arm").textContent = armed ? '좌표 찍기: ON' : '캔버스 클릭으로 좌표 찍기'; });
+  $("#prev").addEventListener('click',()=>{ if(!pdfDoc) return; if(curPage>1){ curPage--; render(curPage); setInfo(); } });
+  $("#next").addEventListener('click',()=>{ if(!pdfDoc) return; if(curPage<total){ curPage++; render(curPage); setInfo(); } });
+  $("#showOnlyThisPage").addEventListener('change',()=>{ drawPins(); });
+
+  // Init
+  setMode('text'); setInfo();
+  // 기본값: 보정 프리셋
+  dx_cm.value = (-1.5).toString(); dy_cm.value = (-1.7).toString(); syncFromCm();
+})();
+</script>
+</body>
+</html>
