@@ -92,7 +92,14 @@ function parseIncoming(event) {
   }
   return {};
 }
-// GET으로 파라미터 없이 접근하면 큰 PDF 생성 대신 정적 파일로 리다이렉트
+
+exports.handler = async (event) => {
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      // GET으로 파라미터 없이 접근하면 큰 PDF 생성 대신 정적 파일로 리다이렉트
 if (event.httpMethod === 'GET' && (!event.queryStringParameters || Object.keys(event.queryStringParameters).length === 0)) {
   return {
     statusCode: 302,
@@ -104,12 +111,6 @@ if (event.httpMethod === 'GET' && (!event.queryStringParameters || Object.keys(e
   };
 }
 
-exports.handler = async (event) => {
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': 'Content-Type',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     }};
   }
   if (event.httpMethod !== 'POST' && event.httpMethod !== 'GET') {
