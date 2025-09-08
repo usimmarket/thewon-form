@@ -716,6 +716,146 @@
   <input type="text" placeholder="카드사" data-req="1">
   <input type="text" placeholder="카드번호" data-req="1">
   <input type="text" placeholder="유효기간(YY/MM)" data-req="1">
-</div>          
+</div> 
+<!-- 👇 여기에 공통 토글 스크립트 삽입 -->
+<script>
+(() => {
+  const $$ = (s, el=document) => Array.from(el.querySelectorAll(s));
+
+  function toggleBy(name) {
+    const checked = document.querySelector(`input[type=radio][name="${name}"]:checked`);
+    const current = checked?.value ?? null;
+    // 해당 name을 참조하는 모든 섹션 토글
+    $$(`[data-when^="${name}:"]`).forEach(section => {
+      const need = section.getAttribute('data-when').slice(name.length + 1);
+      const show = (current === need);
+      section.hidden = !show;
+      $$('input, select, textarea', section).forEach(i => {
+        if (show) { i.disabled = false; if (i.dataset.req === '1') i.required = true; }
+        else      { i.disabled = true;  i.required = false; }
+      });
+    });
+  }
+
+  function wire(name) {
+    $$(`input[type=radio][name="${name}"]`).forEach(r =>
+      r.addEventListener('change', () => toggleBy(name))
+    );
+    toggleBy(name); // 초기 반영
+  }
+
+  // 페이지 내 존재하는 모든 라디오 그룹 자동 연결
+  const names = new Set($$('input[type=radio][name]').map(r => r.name));
+  names.forEach(wire);
+})();
+</script>
+</body>
+</html> 
+<script>
+/**
+ * 드롭인 토글 패치
+ * - 신규/번호이동, 은행/카드처럼 "선택하면 입력칸 생성"되는 환경에서도 동작
+ * - 마크업: data-when="이름:값" 또는 data-when="이름=값" 둘 다 지원
+ * - 보일 때만 필수로 쓸 입력에 data-req="1" 표시 (required 자동 on/off)
+ */
+(() => {
+  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+  // data-when 파싱: "name:value" 또는 "name=value"
+  const parseWhen = (s) => {
+    const m = String(s || '').match(/^\s*([^:=\s]+)\s*[:=]\s*(.+?)\s*$/);
+    return m ? { name: m[1], value: m[2] } : null;
+  };
+
+  // 현재 선택값 조회 (라디오/셀렉트/히든 + .chip 지원)
+  const getCurrentValue = (name) => {
+    // 1) 활성 chip
+    const activeChip = document.querySelector(`.chip[data-name="${name}"].active`);
+    if (activeChip) return activeChip.dataset.value;
+
+    // 2) 라디오
+    const r = document.querySelector(`input[type="radio"][name="${name}"]:checked`);
+    if (r) return r.value;
+
+    // 3) 셀렉트/인풋
+    const f = document.querySelector(`[name="${name}"]`);
+    if (f && 'value' in f) return f.value;
+
+    return null;
+  };
+
+  // 섹션 토글 + required/disabled 관리
+  const applyToggles = () => {
+    const rules = $$('[data-when]').map(el => ({ el, rule: parseWhen(el.getAttribute('data-when')) }))
+                                   .filter(x => x.rule);
+
+    // 필요한 name 전체 수집 → 한 번만 현재값 계산
+    const names = [...new Set(rules.map(x => x.rule.name))];
+    const state = Object.fromEntries(names.map(n => [n, getCurrentValue(n)]));
+
+    // 각 섹션 반영
+    for (const {el, rule} of rules) {
+      const show = state[rule.name] === rule.value;
+      el.hidden = !show;
+
+      // 내부 필드 제어
+      $$('input, select, textarea, button', el).forEach(i => {
+        if (show) {
+          i.disabled = false;
+          if (i.dataset.req === '1') i.required = true;
+        } else {
+          i.disabled = true;
+          i.required = false;
+        }
+      });
+    }
+  };
+
+  // chip 클릭 → active 토글 + hidden 필드 동기화
+  const ensureHiddenField = (name) => {
+    let h = document.querySelector(`input[type="hidden"][name="${name}"]`);
+    if (!h) {
+      h = document.createElement('input');
+      h.type = 'hidden';
+      h.name = name;
+      document.forms[0]?.appendChild(h) || document.body.appendChild(h);
+    }
+    return h;
+  };
+
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.chip[data-name][data-value]');
+    if (!btn) return;
+
+    const { name, value } = btn.dataset;
+
+    // 같은 name 그룹 활성화 갱신
+    $$.call(null, `.chip[data-name="${name}"]`).forEach(c => c.classList.toggle('active', c === btn));
+
+    // hidden 필드에 선택값 반영 (폼 제출 호환)
+    const h = ensureHiddenField(name);
+    h.value = value;
+    h.dispatchEvent(new Event('change', { bubbles: true }));
+
+    applyToggles();
+  });
+
+  // change 이벤트 위임(라디오/셀렉트/인풋)
+  document.addEventListener('change', (e) => {
+    const t = e.target;
+    const name = t?.name || t?.dataset?.name;
+    if (!name) return;
+    applyToggles();
+  });
+
+  // 동적 생성 감지 → 자동 재평가
+  const mo = new MutationObserver(() => applyToggles());
+  mo.observe(document.documentElement, { childList: true, subtree: true });
+
+  // 초기 1회 적용
+  document.addEventListener('DOMContentLoaded', applyToggles);
+})();
+</script>
+        
 </body>
 </html>
