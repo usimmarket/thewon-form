@@ -1,7 +1,5 @@
 {
-  "meta": { "pdf": "template.pdf", "previewW": 1299, "previewH": 1841 },
-  "fields": { ... },
-  "vmap": { ... }
+"meta": { "pdf":"template.pdf", "previewW":1299, "previewH":1841, "nudgeX":0, "nudgeY":0 }
 }
 }
 {
