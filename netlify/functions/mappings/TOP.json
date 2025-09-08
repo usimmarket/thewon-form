@@ -1,4 +1,17 @@
 {
+  "meta": {
+    "pdf": "template.pdf",
+    "previewW": 1299,
+    "previewH": 1841
+  },
+  "fields": {
+    "...": { "x": 100, "y": 200, "page": 1, "size": 10 }
+  },
+  "vmap": {
+    "prev_carrier.MVNO": { "x": 300, "y": 400, "page": 1, "size": 12 }
+  }
+}
+{
   "fields": {
     "addr_line1_p1_1": {
       "x": 156,
