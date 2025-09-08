@@ -103,6 +103,22 @@ exports.handler = async (event) => {
     path.join(process.cwd(),'malgun.ttf')
   ]);
 
+  // ---- mapping 읽고 pdfPath를 결정한 직후에 추가 ----
+const stats = fs.existsSync(pdfPath) ? fs.statSync(pdfPath) : null;
+if ((event.httpMethod === 'GET') && (event.queryStringParameters || {}).debug === '1') {
+  return {
+    statusCode: 200,
+    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+    body: JSON.stringify({
+      pdfPath,
+      pdfSize: stats ? stats.size : null,
+      mappingPath,
+      mappingMeta: mapping.meta,
+      malgunPath
+    })
+  };
+}
+
   // PDF 생성
   const pdfDoc = await PDFDocument.load(baseBytes);
   pdfDoc.registerFontkit(fontkit);
