@@ -1,6 +1,215 @@
 {
-  "meta": { "pdf": "template.pdf" },
-  "text": {},
-  "checkbox": {},
-  "lines": []
+  "fields": {
+    "addr_line1_p1_1": {
+      "x": 156,
+      "y": 206,
+      "size": 10,
+      "page": 1,
+      "source": [
+        "addr_line1"
+      ],
+      "type": "text"
+    },
+    "apply_date_p1_2": {
+      "x": 225,
+      "y": 812,
+      "size": 11,
+      "page": 1,
+      "source": [
+        "apply_date"
+      ],
+      "type": "text"
+    },
+    "autopay_birth_p1_3": {
+      "x": 428,
+      "y": 269,
+      "size": 10,
+      "page": 1,
+      "source": [
+        "autopay_birth"
+      ],
+      "type": "text"
+    },
+    "autopay_number_p1_4": {
+      "x": 399,
+      "y": 290,
+      "size": 10,
+      "page": 1,
+      "source": [
+        "autopay_number"
+      ],
+      "type": "text"
+    },
+    "autopay_holder_p1_5": {
+      "x": 407,
+      "y": 332,
+      "size": 10,
+      "page": 1,
+      "source": [
+        "autopay_holder"
+      ],
+      "type": "text"
+    },
+    "autopay_exp_p1_6": {
+      "x": 553,
+      "y": 290,
+      "size": 10,
+      "page": 1,
+      "source": [
+        "autopay_exp"
+      ],
+      "type": "text"
+    },
+    "autopay_org_p1_7": {
+      "x": 225,
+      "y": 290,
+      "size": 10,
+      "page": 1,
+      "source": [
+        "autopay_org"
+      ],
+      "type": "text"
+    },
+    "autopay_holder_p1_8": {
+      "x": 211,
+      "y": 269,
+      "size": 10,
+      "page": 1,
+      "source": [
+        "autopay_holder"
+      ],
+      "type": "text"
+    },
+    "birth_p1_9": {
+      "x": 464,
+      "y": 164,
+      "size": 10,
+      "page": 1,
+      "source": [
+        "birth"
+      ],
+      "type": "text"
+    },
+    "mvno_name_p1_10": {
+      "x": 543,
+      "y": 404,
+      "size": 10,
+      "page": 1,
+      "source": [
+        "mvno_name"
+      ],
+      "type": "text"
+    },
+    "plan_p1_11": {
+      "x": 154,
+      "y": 185,
+      "size": 11,
+      "page": 1,
+      "source": [
+        "plan"
+      ],
+      "type": "text"
+    },
+    "port_number_p1_12": {
+      "x": 183,
+      "y": 403,
+      "size": 12,
+      "page": 1,
+      "source": [
+        "port_number"
+      ],
+      "type": "text"
+    },
+    "sim_serial_p1_13": {
+      "x": 157,
+      "y": 226,
+      "size": 10,
+      "page": 1,
+      "source": [
+        "sim_serial"
+      ],
+      "type": "text"
+    },
+    "subscriber_name_p1_14": {
+      "x": 154,
+      "y": 165,
+      "size": 11,
+      "page": 1,
+      "source": [
+        "subscriber_name"
+      ],
+      "type": "text"
+    },
+    "subscriber_name_p1_15": {
+      "x": 376,
+      "y": 719,
+      "size": 10,
+      "page": 1,
+      "source": [
+        "subscriber_name"
+      ],
+      "type": "text"
+    },
+    "subscriber_name_p1_16": {
+      "x": 376,
+      "y": 794,
+      "size": 10,
+      "page": 1,
+      "source": [
+        "subscriber_name"
+      ],
+      "type": "text"
+    },
+    "wish4_p1_17": {
+      "x": 190,
+      "y": 248,
+      "size": 10,
+      "page": 1,
+      "source": [
+        "wish4"
+      ],
+      "type": "text"
+    }
+  },
+  "vmap": {
+    "join_type:new": {
+      "x": 101,
+      "y": 131,
+      "size": 11,
+      "page": 1
+    },
+    "join_type:port": {
+      "x": 149,
+      "y": 131,
+      "size": 11,
+      "page": 1
+    },
+    "prev_carrier:SK": {
+      "x": 422,
+      "y": 403,
+      "size": 11,
+      "page": 1
+    },
+    "prev_carrier:KT": {
+      "x": 450,
+      "y": 403,
+      "size": 11,
+      "page": 1
+    },
+    "prev_carrier:LGU+": {
+      "x": 474,
+      "y": 403,
+      "size": 11,
+      "page": 1
+    },
+    "prev_carrier:MVNO": {
+      "x": 508,
+      "y": 403,
+      "size": 11,
+      "page": 1
+    }
+  },
+  "fixed_flags": {
+    "intl_roaming_block": []
+  }
 }
