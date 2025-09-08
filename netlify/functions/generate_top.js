@@ -66,45 +66,52 @@ function normalizeMapping(raw) {
   return out;
 }
 
+function parseIncoming(event) {
+  const headers = event.headers || {};
+  const ct = (headers['content-type'] || headers['Content-Type'] || '').toLowerCase();
+  // POST/OPTIONS
+  if (event.httpMethod === 'POST') {
+    if (!event.body) return {};
+    // JSON
+    try { return JSON.parse(event.body); } catch {}
+    // form-urlencoded
+    if (ct.includes('application/x-www-form-urlencoded')) {
+      const p = qs.parse(event.body);
+      if (p.data && typeof p.data === 'string') { try { return JSON.parse(p.data); } catch {} }
+      return p;
+    }
+    // text/plain (data=... 또는 그냥 JSON 흉내)
+    const maybe = event.body.trim().replace(/^data=/,'');
+    try { return JSON.parse(maybe); } catch { return {}; }
+  }
+  // GET: query string
+  if (event.httpMethod === 'GET') {
+    const q = event.queryStringParameters || {};
+    if (q.data && typeof q.data === 'string') { try { return JSON.parse(q.data); } catch {} }
+    return q;
+  }
+  return {};
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 200, headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Headers': 'Content-Type',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     }};
   }
-  if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' };
+  if (event.httpMethod !== 'POST' && event.httpMethod !== 'GET') {
+    return { statusCode: 405, body: 'Method Not Allowed' };
+  }
 
   try {
-    /* --- 요청 본문을 형식에 상관없이 파싱(JSON, form-urlencoded, text) --- */
-    const headers = event.headers || {};
-    const ct = (headers['content-type'] || headers['Content-Type'] || '').toLowerCase();
-    let payload = {};
-    if (event.body) {
-      try {
-        payload = JSON.parse(event.body);
-      } catch {
-        if (ct.includes('application/x-www-form-urlencoded')) {
-          payload = qs.parse(event.body);
-          // form-data 안에 data=... 형태 지원
-          if (payload.data && typeof payload.data === 'string') {
-            try { payload = JSON.parse(payload.data); } catch {}
-          }
-        } else {
-          // text/plain 등: data=... 또는 그냥 JSON 흉내
-          const maybe = event.body.trim().replace(/^data=/,'');
-          try { payload = JSON.parse(maybe); } catch { payload = {}; }
-        }
-      }
-    }
-    const dataIn = payload.data || payload || {};
-    const data = { ...dataIn };
+    const payload = parseIncoming(event);
+    const data = { ...(payload.data || payload || {}) };
     if (!data.apply_date) data.apply_date = formatApplyDate(new Date());
     if ((data.prev_carrier||'').toUpperCase() !== 'MVNO') data.mvno_name = '';
     normalizeAutopay(data);
 
-    /* --- 경로 해석 --- */
     const __dirnameFn = __dirname;                  // <repo>/netlify/functions
     const repoRoot    = path.resolve(__dirnameFn, '../../'); // <repo>/
     const mappingPath = path.join(__dirnameFn, 'mappings', 'TOP.json');
@@ -116,7 +123,7 @@ exports.handler = async (event) => {
       catch (e) { console.warn('Mapping parse error:', e.message); }
     }
 
-    // 템플릿 PDF
+    // 템플릿
     const pdfRel  = (mapping.meta && mapping.meta.pdf) || 'template.pdf';
     const pdfPath = firstExistingPath([
       path.join(repoRoot, pdfRel),
@@ -125,9 +132,7 @@ exports.handler = async (event) => {
       path.join(__dirnameFn, '../../template.pdf'),
       path.join(process.cwd(), pdfRel)
     ]);
-    if (!pdfPath) {
-      return { statusCode: 400, headers:{'Access-Control-Allow-Origin':'*'}, body: `Base PDF not found: ${pdfRel}` };
-    }
+    if (!pdfPath) return { statusCode: 400, headers:{'Access-Control-Allow-Origin':'*'}, body: `Base PDF not found: ${pdfRel}` };
     const baseBytes = fs.readFileSync(pdfPath);
 
     // 폰트
@@ -137,43 +142,33 @@ exports.handler = async (event) => {
       path.join(process.cwd(), 'malgun.ttf')
     ]);
 
-    /* --- PDF 생성 --- */
     const pdfDoc = await PDFDocument.load(baseBytes);
     pdfDoc.registerFontkit(fontkit);
     const helv = await pdfDoc.embedFont(StandardFonts.Helvetica);
     let malgun = helv;
-    if (malgunPath) {
-      try { malgun = await pdfDoc.embedFont(fs.readFileSync(malgunPath)); }
-      catch (e) { console.warn('malgun.ttf load failed:', e.message); }
-    }
+    if (malgunPath) { try { malgun = await pdfDoc.embedFont(fs.readFileSync(malgunPath)); } catch (e) { console.warn('malgun.ttf load failed:', e.message); } }
 
-    // 매핑이 비어있어도 템플릿 그대로 출력되도록
-    if (mapping.text) {
-      for (const [key, spots] of Object.entries(mapping.text)) {
-        const val = data[key];
-        (spots||[]).forEach(s => {
-          const page = pdfDoc.getPage((s.p||1)-1);
-          const font = s.font && s.font.toLowerCase().includes('malgun') ? malgun : helv;
-          drawText(page, font, val, s.x, s.y, s.size||10);
-        });
-      }
-    }
-    if (mapping.checkbox) {
-      for (const [compound, spots] of Object.entries(mapping.checkbox)) {
-        const [field, expect] = compound.includes('.') ? compound.split('.') : compound.split(':');
-        const v = data[field];
-        const match = typeof v === 'boolean' ? (v && expect==='true') :
-                      typeof v === 'string'  ? (v.toLowerCase() === (expect||'').toLowerCase()) :
-                      (v === expect);
-        if (match) (spots||[]).forEach(s => drawCheck(pdfDoc.getPage((s.p||1)-1), s.x, s.y, s.size||12));
-      }
-    }
-    if (mapping.lines) {
-      (mapping.lines||[]).forEach(s => {
+    // 드로잉(매핑 없으면 템플릿만 출력)
+    if (mapping.text) for (const [key, spots] of Object.entries(mapping.text)) {
+      const val = data[key];
+      (spots||[]).forEach(s => {
         const page = pdfDoc.getPage((s.p||1)-1);
-        drawLine(page, s.x1, s.y1, s.x2, s.y2, s.w||1);
+        const font = s.font && s.font.toLowerCase().includes('malgun') ? malgun : helv;
+        drawText(page, font, val, s.x, s.y, s.size||10);
       });
     }
+    if (mapping.checkbox) for (const [compound, spots] of Object.entries(mapping.checkbox)) {
+      const [field, expect] = compound.includes('.') ? compound.split('.') : compound.split(':');
+      const v = data[field];
+      const match = typeof v === 'boolean' ? (v && expect==='true')
+                 : typeof v === 'string'  ? (v.toLowerCase() === (expect||'').toLowerCase())
+                 : (v === expect);
+      if (match) (spots||[]).forEach(s => drawCheck(pdfDoc.getPage((s.p||1)-1), s.x, s.y, s.size||12));
+    }
+    if (mapping.lines) (mapping.lines||[]).forEach(s => {
+      const page = pdfDoc.getPage((s.p||1)-1);
+      drawLine(page, s.x1, s.y1, s.x2, s.y2, s.w||1);
+    });
 
     const out = await pdfDoc.save();
     return {
@@ -189,10 +184,6 @@ exports.handler = async (event) => {
     };
   } catch (e) {
     console.error('generate_top error:', e);
-    return {
-      statusCode: 500,
-      headers: { 'Access-Control-Allow-Origin': '*' },
-      body: 'Error: ' + (e?.message || e)
-    };
+    return { statusCode: 500, headers: { 'Access-Control-Allow-Origin':'*' }, body: 'Error: ' + (e?.message || e) };
   }
 };
