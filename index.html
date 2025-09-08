@@ -533,5 +533,123 @@
   document.querySelectorAll('.chip').forEach(btn=>btn.addEventListener('click', e=>applyLang(e.currentTarget.dataset.lang)));
   applyLang('KR');
 </script>
+<script>
+(function () {
+  // 0) DOM 로드 이후에 실행
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  function init() {
+    // 기존 inline onclick이 있으면 제거 (자동 print 방지)
+    wipeInlineOnclicks();
+
+    const btnPrint = findButton(['#btnPrint','[data-role="print"]'], ['인쇄']);
+    const btnSave  = findButton(['#btnSave','[data-role="save"]'], ['PDF 저장','저장']);
+
+    if (btnPrint) {
+      if (btnPrint.tagName === 'BUTTON' && btnPrint.type !== 'button') btnPrint.type = 'button';
+      btnPrint.addEventListener('click', handlePrint, { passive: false });
+    } else {
+      console.warn('인쇄 버튼을 찾지 못했습니다.');
+    }
+
+    if (btnSave) {
+      if (btnSave.tagName === 'BUTTON' && btnSave.type !== 'button') btnSave.type = 'button';
+      btnSave.addEventListener('click', handleSave, { passive: false });
+    } else {
+      console.warn('PDF 저장 버튼을 찾지 못했습니다.');
+    }
+  }
+
+  // 폼 데이터 수집: 페이지에 있는 기존 함수명이 있으면 그대로 사용
+  function getFormPayload() {
+    if (typeof window.buildPayload === 'function') return window.buildPayload();
+    if (typeof window.collectFormData === 'function') return window.collectFormData();
+    if (typeof window.getFormData === 'function') return window.getFormData();
+    // fallback: 첫 번째 form 내용을 직렬화
+    const form = document.querySelector('form');
+    if (!form) return {};
+    const fd = new FormData(form);
+    const obj = {};
+    fd.forEach((v,k) => obj[k] = v);
+    return obj;
+  }
+
+  // 인쇄: 새 탭으로 PDF만 열기 (print() 호출 안 함)
+  function handlePrint(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const data = getFormPayload();
+    const url  = '/.netlify/functions/generate_top?data=' + encodeURIComponent(JSON.stringify(data));
+    window.open(url, '_blank', 'noopener'); // 새 탭 웹뷰어에서 인쇄 가능
+  }
+
+  // 저장: 즉시 다운로드
+  async function handleSave(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const data = getFormPayload();
+    try {
+      const resp = await fetch('/.netlify/functions/generate_top', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data })
+      });
+      if (!resp.ok) {
+        const msg = await resp.text();
+        alert('PDF 생성 오류: ' + msg);
+        return;
+      }
+      const blob = await resp.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url;
+      a.download = 'THE_ONE_' + new Date().toISOString().slice(0,10) + '.pdf';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert('PDF 저장 중 오류: ' + (err && err.message ? err.message : err));
+    }
+  }
+
+  // 유틸: 버튼 찾기 (셀렉터 우선 → 텍스트로 폴백)
+  function findButton(selectors, texts) {
+    for (const sel of selectors) {
+      const el = document.querySelector(sel);
+      if (el) return el;
+    }
+    const candidates = Array.from(document.querySelectorAll('button, a, input[type="button"], input[type="submit"]'));
+    return candidates.find(el => {
+      const t = (el.textContent || el.value || '').trim();
+      return texts.some(key => t.includes(key));
+    }) || null;
+  }
+
+  // 유틸: 자동 인쇄 막기 (iframe onload, window.print 등)
+  function wipeInlineOnclicks() {
+    // 인라인 onclick 제거
+    document.querySelectorAll('[onclick]').forEach(el => {
+      const val = String(el.getAttribute('onclick') || '').toLowerCase();
+      if (val.includes('print(') || val.includes('window.print')) {
+        el.setAttribute('data-onclick-backup', el.getAttribute('onclick'));
+        el.removeAttribute('onclick');
+      }
+    });
+    // 프레임 onload 프린트 방지
+    document.querySelectorAll('iframe[onload]').forEach(el => {
+      const val = String(el.getAttribute('onload') || '').toLowerCase();
+      if (val.includes('print(') || val.includes('contentwindow.print')) {
+        el.setAttribute('data-onload-backup', el.getAttribute('onload'));
+        el.removeAttribute('onload');
+      }
+    });
+  }
+})();
+</script>          
 </body>
 </html>
