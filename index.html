@@ -471,13 +471,12 @@
   document.querySelectorAll('.chip').forEach(btn=>btn.addEventListener('click', e=>applyLang(e.currentTarget.dataset.lang)));
   applyLang('KR');
 </script>
- <script>
+<script>
 // PATCH: PRINT ONLY — 인쇄/저장 동작만 조정 (디자인/레이아웃/텍스트 변경 없음)
 (function () {
-  // 저장될 파일명(원하면 바꿔도 됨 — 텍스트만 변경, UI 영향 없음)
   var PDF_FILE_NAME = 'THEONE_신청서.pdf';
 
-  // 버튼 탐색: id/속성이 없어도 "텍스트"로 안전하게 찾아서 후킹(HTML 수정 불필요)
+  // 공통: 버튼을 텍스트로 탐색(HTML 구조 수정 불필요)
   function findButtonByText(candidates) {
     var buttons = Array.from(document.querySelectorAll('button, a, [role="button"], input[type="button"], input[type="submit"]'));
     return buttons.find(function (el) {
@@ -486,63 +485,88 @@
     }) || null;
   }
 
-  // 다음에 열릴 PDF 새창을 "저장"으로 바꿔치기 (window.open 가 PDF를 열면 → 다운로드로 전환)
+  // 저장: 다음에 열릴 PDF를 새 탭 대신 '다운로드'로 전환
   function forceNextPdfOpenToDownload(filename) {
     var restored = false;
     var origOpen = window.open;
 
-    function restore() {
-      if (restored) return;
-      window.open = origOpen;
-      restored = true;
-    }
-
-    window.open = function(url, name, features) {
+    function restore() { if (restored) return; window.open = origOpen; restored = true; }
+    window.open = function(url) {
       try {
         if (typeof url === 'string' && (url.indexOf('blob:') === 0 || url.indexOf('data:application/pdf') === 0)) {
           var a = document.createElement('a');
           a.style.display = 'none';
           a.href = url;
           a.download = filename || 'document.pdf';
-          document.body.appendChild(a);
-          a.click();
-          requestAnimationFrame(function(){ a.remove(); });
-          restore();
-          return null; // 새 탭 열지 않음
+          document.body.appendChild(a); a.click(); requestAnimationFrame(function(){ a.remove(); });
+          restore(); return null; // 새 탭 열지 않음
         }
-      } catch (e) { /* 조용히 패스(원 동작 유지) */ }
+      } catch (e) { /* 원동작 유지 */ }
       return origOpen.apply(window, arguments);
     };
-
-    // 혹시를 위한 자동 복구(8초 후 원상복구)
     setTimeout(restore, 8000);
   }
 
-  // 짧은 시간 동안 window.print()를 무력화(인쇄 다이얼로그 방지)
-  function suppressPrintForNext(ms) {
+  // 인쇄: 현재창/자식창(print) 동시 무력화
+  function suppressPrintSequence(ms) {
+    var duration = ms || 8000;
+
+    // 1) 현재 창의 window.print 임시 무력화
     var origPrint = window.print;
-    window.print = function(){ /* suppressed by PATCH: PRINT ONLY */ };
-    setTimeout(function(){ window.print = origPrint; }, ms || 8000);
+    window.print = function(){ /* suppressed */ };
+
+    // 2) 바로 다음 window.open 으로 열린 "자식 창"의 .print()도 못 누르게 프록시 반환
+    var origOpen  = window.open;
+    var restored  = false;
+    function restore() {
+      if (restored) return;
+      restored = true;
+      window.print = origPrint;
+      window.open  = origOpen;
+    }
+    window.open = function() {
+      var child = origOpen.apply(window, arguments);
+      try {
+        // 자식창 레퍼런스에 대해 .print() 호출을 가로채는 Proxy
+        var proxy = new Proxy(child || {}, {
+          get: function(target, prop) {
+            if (prop === 'print') return function(){ /* suppressed (child) */ };
+            try { return target[prop]; } catch(e) { return undefined; }
+          },
+          set: function(target, prop, value) {
+            try { target[prop] = value; } catch(e) { /* cross-origin 무시 */ }
+            return true;
+          }
+        });
+        setTimeout(restore, duration);
+        return proxy;
+      } catch (e) {
+        setTimeout(restore, duration);
+        return child;
+      }
+    };
+
+    setTimeout(restore, duration);
   }
 
-  // 가능한 텍스트 패턴(공백/대소문자 무시)
-  var saveBtn = findButtonByText(['pdf저장','저장(pdf)','pdfsave','savepdf']);
+  // 버튼 매핑
+  var saveBtn  = findButtonByText(['pdf저장','저장(pdf)','pdfsave','savepdf']);
   var printBtn = findButtonByText(['인쇄','print']);
 
-  // PDF 저장: 바로 다운로드로 전환(미리보기 새 탭 방지)
+  // 저장 버튼: 바로 다운로드
   if (saveBtn) {
     saveBtn.addEventListener('click', function () {
       forceNextPdfOpenToDownload(PDF_FILE_NAME);
-    }, true); // 캡쳐 단계에서 먼저 개입
+    }, true); // 캡처 단계에서 선제 개입
   }
 
-  // 인쇄: 프린트 다이얼로그 억제(동시에 뜨던 인쇄창 방지)
+  // 인쇄 버튼: 프린트 다이얼로그 억제(자식창 print 포함)
   if (printBtn) {
     printBtn.addEventListener('click', function () {
-      suppressPrintForNext(8000); // 8초 동안만 차단하여 다른 기능 영향 최소화
+      suppressPrintSequence(8000); // 8초 제한(다른 기능 영향 최소화)
     }, true);
   }
 })();
-</script> 
+</script>
 </body>
 </html>
