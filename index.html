@@ -650,6 +650,46 @@
     });
   }
 })();
-</script>          
+</script>
+<script>
+  // 유틸
+  const $ = (s, el=document) => el.querySelector(s);
+  const $$ = (s, el=document) => Array.from(el.querySelectorAll(s));
+  const toggle = (sel, on) => {
+    const el = $(sel);
+    if (!el) return;
+    el.style.display = on ? '' : 'none';
+    // 숨길 땐 내부 input을 비활성화/required 해제, 보일 땐 복원
+    $$('input, select, textarea', el).forEach(i => {
+      if (on) { i.disabled = false; if (i.dataset.req === '1') i.required = true; }
+      else    { i.disabled = true;  i.required = false; }
+    });
+  };
+
+  // 1) 가입유형 (신규 / 번호이동)
+  function updateJoinType() {
+    const val = $('input[name="join_type"]:checked')?.value;   // "신규" 또는 "번호이동"
+    toggle('#mnp-extra', val === '번호이동');                  // 번호이동 전용 영역
+  }
+
+  // 2) 자동이체 방식 (은행 / 카드)
+  function updateAutopay() {
+    const val = $('input[name="autopay_method"]:checked')?.value; // "bank" 또는 "card"
+    toggle('#bank-fields', val === 'bank');
+    toggle('#card-fields', val === 'card');
+  }
+
+  // 초기 연결 + 첫 렌더 반영
+  document.addEventListener('DOMContentLoaded', () => {
+    // 라디오에 value가 꼭 있어야 합니다!
+    $$('input[name="join_type"]').forEach(r => r.addEventListener('change', updateJoinType));
+    $$('input[name="autopay_method"]').forEach(r => r.addEventListener('change', updateAutopay));
+
+    // 첫 로드에서 상태 반영
+    updateJoinType();
+    updateAutopay();
+  });
+</script>
+          
 </body>
 </html>
