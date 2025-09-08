@@ -691,6 +691,31 @@
     updateAutopay();
   });
 </script>
-          
+<!-- 가입유형 -->
+<label><input type="radio" name="join_type" value="신규" checked> 신규</label>
+<label><input type="radio" name="join_type" value="번호이동"> 번호이동</label>
+
+<!-- 번호이동 전용 영역 -->
+<div data-when="join_type:번호이동" hidden>
+  <!-- 번호이동 추가입력란들 -->
+  <input type="text" placeholder="이전 통신사" data-req="1">
+</div>
+
+<!-- 자동이체 방식 -->
+<label><input type="radio" name="autopay_method" value="bank" checked> 은행</label>
+<label><input type="radio" name="autopay_method" value="card"> 카드</label>
+
+<!-- 은행 전용 -->
+<div data-when="autopay_method:bank">
+  <input type="text" placeholder="은행명" data-req="1">
+  <input type="text" placeholder="계좌번호" data-req="1">
+</div>
+
+<!-- 카드 전용 -->
+<div data-when="autopay_method:card" hidden>
+  <input type="text" placeholder="카드사" data-req="1">
+  <input type="text" placeholder="카드번호" data-req="1">
+  <input type="text" placeholder="유효기간(YY/MM)" data-req="1">
+</div>          
 </body>
 </html>
