@@ -233,6 +233,68 @@
 </main>
 
 <script>
+<script>
+  // ★ 이미 쓰고 있는 폼 데이터 수집 함수를 그대로 사용하세요.
+  //   예: buildPayload() / collectFormData() / getFormData() 등
+  //   아래 helper는 그 함수명이 다를 때를 대비한 안전장치입니다.
+  function getFormPayload() {
+    if (typeof window.buildPayload === 'function') return window.buildPayload();
+    if (typeof window.collectFormData === 'function') return window.collectFormData();
+    if (typeof window.getFormData === 'function') return window.getFormData();
+    // 위 함수들 중 아무 것도 없다면, 최소 fallback (필요시 키 매핑 보완)
+    const form = document.querySelector('form');
+    const fd = new FormData(form);
+    const obj = {};
+    fd.forEach((v,k)=>obj[k]=v);
+    return obj;
+  }
+
+  // 1) 인쇄: 자동 print() 호출 없이, 새 탭에 PDF만 열기
+  (document.getElementById('btnPrint') || document.querySelector('[data-role="print"]'))
+    ?.addEventListener('click', (e) => {
+      e.preventDefault();
+      const data = getFormPayload();
+      const url = '/.netlify/functions/generate_top?data=' + encodeURIComponent(JSON.stringify(data));
+      // 중요: 여기서 print() 호출하지 않음!
+      window.open(url, '_blank', 'noopener');
+    });
+
+  // 2) PDF 저장: 즉시 다운로드
+  (document.getElementById('btnSave') || document.querySelector('[data-role="save"]'))
+    ?.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try {
+        const data = getFormPayload();
+        const resp = await fetch('/.netlify/functions/generate_top', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ data })
+        });
+        if (!resp.ok) {
+          const msg = await resp.text();
+          alert('PDF 생성 오류: ' + msg);
+          return;
+        }
+        const blob = await resp.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        // 파일명은 원하면 바꾸세요
+        a.download = 'THE_ONE_' + new Date().toISOString().slice(0,10) + '.pdf';
+        a.href = url;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        alert('PDF 저장 중 오류: ' + (err?.message || err));
+      }
+    });
+
+  // 3) 혹시 남아 있을 수 있는 자동 인쇄 트리거 제거(선택)
+  //    onload에서 window.print()를 호출하는 코드, iframe onload print 등은 주석/삭제하세요.
+  //    예: window.print();  → 주석 처리
+</script>
+
   function fnUrl(){
     const ABS = 'https://thewon-form.netlify.app/.netlify/functions/generate_top'; // 바꿔도 됨(사용 중인 Netlify 기본 도메인)
     const REL = '/.netlify/functions/generate_top';
