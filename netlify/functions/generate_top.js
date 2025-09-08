@@ -6,22 +6,83 @@ const { PDFDocument, StandardFonts, rgb } = require('pdf-lib');
 const fontkit = require('@pdf-lib/fontkit');
 const qs = require('querystring');
 
+/* =========================
+   좌표 변환 설정 (필수 세팅)
+   ========================= */
+/**
+ * 매핑 스튜디오 화면 우상단 'proof: W, H' 값을 그대로 넣으세요.
+ * 예) proof: 1299, 1841  -> PREVIEW_W=1299, PREVIEW_H=1841
+ * 이 값이 정확해야 화면에서 찍은 좌표(px)와 PDF(pt)가 1:1로 매칭됩니다.
+ */
+let PREVIEW_W = 1299;  // ← 반드시 스튜디오 proof 가로 px로 변경
+let PREVIEW_H = 1841;  // ← 반드시 스튜디오 proof 세로 px로 변경
+
+// 전체가 살짝 쏠릴 때 ±1~3pt 정도로 보정
+const NUDGE_X = 0; // +면 오른쪽, -면 왼쪽
+const NUDGE_Y = 0; // +면 위로, -면 아래로
+
+// 필요 시 매핑 JSON(meta.previewW/H)로 덮어쓰기 위해 export 전역변수처럼 씀
+function setPreviewWHFromMeta(meta = {}) {
+  const mw = Number(meta.previewW);
+  const mh = Number(meta.previewH);
+  if (mw > 0 && mh > 0) {
+    PREVIEW_W = mw;
+    PREVIEW_H = mh;
+  }
+}
+
+/* ---------- 좌표 변환 유틸 ---------- */
+// px → pt (x, 좌상단 기준)
+function toX(page, xPx) {
+  const pageW = page.getWidth();
+  const sx = pageW / PREVIEW_W;
+  return xPx * sx + NUDGE_X;
+}
+// px → pt (y, 좌상단 기준을 PDF 좌표로)
+function toY(page, yPx) {
+  const pageH = page.getHeight();
+  const sy = pageH / PREVIEW_H;
+  return (pageH - (yPx * sy)) + NUDGE_Y;
+}
+// px → pt (텍스트용 y: 베이스라인 보정 포함)
+function toYTop(page, yPx, font, size) {
+  const yTop = toY(page, yPx); // 칸 위쪽 기준
+  const ascent = font ? font.ascentAtSize(size) : 0; // 베이스라인 보정
+  return yTop - ascent;
+}
+
 /* ---------- helpers ---------- */
-function drawText(p, f, t, x, y, s = 10) {
+function drawText(p, f, t, xPx, yPx, s = 10) {
   if (t == null) t = '';
-  p.drawText(String(t), { x, y, size: s, font: f, color: rgb(0, 0, 0) });
+  p.drawText(String(t), {
+    x: toX(p, xPx),
+    y: toYTop(p, yPx, f, s),
+    size: s,
+    font: f,
+    color: rgb(0, 0, 0)
+  });
 }
-// 기존
-// function drawCheck(page, x, y, size = 12) { page.drawText("✓", { x, y, size, color: rgb(0,0,0) }); }
 
-// 변경: 기본 문자를 'V'로, 필요하면 spot에 char/font도 줄 수 있게
-function drawCheck(page, x, y, size = 12, char = "V", font) {
-  page.drawText(String(char || "V"), { x, y, size, font, color: rgb(0, 0, 0) });
+// 체크 표시(문자는 기본 'V', spot에서 char 지정 가능)
+function drawCheck(page, xPx, yPx, size = 12, char = "V", font) {
+  page.drawText(String(char || "V"), {
+    x: toX(page, xPx),
+    y: toYTop(page, yPx, font, size),
+    size,
+    font,
+    color: rgb(0, 0, 0)
+  });
 }
 
-function drawLine(p, x1, y1, x2, y2, w = 1) {
-  p.drawLine({ start: { x: x1, y: y1 }, end: { x: x2, y: y2 }, thickness: w, color: rgb(0, 0, 0) });
+function drawLine(p, x1Px, y1Px, x2Px, y2Px, w = 1) {
+  p.drawLine({
+    start: { x: toX(p, x1Px), y: toY(p, y1Px) },
+    end:   { x: toX(p, x2Px), y: toY(p, y2Px) },
+    thickness: w,
+    color: rgb(0, 0, 0)
+  });
 }
+
 function formatApplyDate(d) {
   const y = d.getFullYear(), m = d.getMonth() + 1, dd = String(d.getDate()).padStart(2, '0');
   return `신청일자 ${y}년 ${m}월 ${dd}일`;
@@ -110,7 +171,7 @@ exports.handler = async (event) => {
     };
   }
 
-  // 빈 GET(쿼리 없음)은 템플릿으로 리다이렉트(큰 PDF 생성 회피)
+  // 빈 GET(쿼리 없음)은 템플릿으로 리다이렉트
   const qsParams = event.queryStringParameters || {};
   if (event.httpMethod === 'GET' && Object.keys(qsParams).length === 0) {
     return {
@@ -124,24 +185,26 @@ exports.handler = async (event) => {
     };
   }
 
-  // GET/POST 데이터 파싱
+  // 입력 데이터 파싱
   const payload = parseIncoming(event);
   const data = { ...(payload.data || payload || {}) };
   if (!data.apply_date) data.apply_date = formatApplyDate(new Date());
   if ((data.prev_carrier || '').toUpperCase() !== 'MVNO') data.mvno_name = '';
   normalizeAutopay(data);
 
-  // 경로 설정
+  // 경로
   const __fn = __dirname;                         // <repo>/netlify/functions
   const repoRoot = path.resolve(__fn, '../../');  // <repo>/
   const mappingPath = path.join(__fn, 'mappings', 'TOP.json');
 
-  // 매핑 로딩(없어도 템플릿만 출력)
+  // 매핑 로딩
   let mapping = { meta:{pdf:'template.pdf'}, text:{}, checkbox:{}, lines:[] };
   try {
     if (fs.existsSync(mappingPath)) {
       const raw = JSON.parse(fs.readFileSync(mappingPath, 'utf-8'));
       mapping = normalizeMapping(raw);
+      // meta.previewW/H 있으면 좌표 스케일에 반영
+      setPreviewWHFromMeta(mapping.meta || {});
     }
   } catch (e) { console.warn('Mapping parse error:', e.message); }
 
@@ -165,7 +228,7 @@ exports.handler = async (event) => {
     path.join(process.cwd(), 'malgun.ttf')
   ]);
 
-  // 디버그(JSON으로 경로/크기 보기)
+  // 디버그(JSON)
   if (event.httpMethod === 'GET' && (qsParams.debug === '1')) {
     const st = fs.existsSync(pdfPath) ? fs.statSync(pdfPath) : null;
     return {
@@ -176,7 +239,9 @@ exports.handler = async (event) => {
         pdfSize: st ? st.size : null,
         mappingPath,
         mappingMeta: mapping.meta,
-        malgunPath
+        malgunPath,
+        previewWH: { PREVIEW_W, PREVIEW_H },
+        nudge: { NUDGE_X, NUDGE_Y }
       })
     };
   }
@@ -188,34 +253,31 @@ exports.handler = async (event) => {
   // 기본 폰트(영문/숫자 등)
   const helv = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-  // 이번 렌더링에서 "정말로" 말굿이 필요한지 판단
+  // 말굿 사용 판단
   let useMalgun = false;
   if (mapping.text) {
     for (const [key, spots] of Object.entries(mapping.text)) {
       if (!spots || !spots.length) continue;
       const val = data[key];
       if (hasNonAscii(val)) { useMalgun = true; break; }
-      // 폰트가 명시적으로 'malgun'인 경우에도 필요 플래그만 세팅(실제 값에 한글 없으면 서브셋이 매우 작음)
       if (spots.some(s => (s.font || '').toLowerCase().includes('malgun'))) { useMalgun = true; break; }
     }
   }
-  // 날짜를 실제로 찍는 매핑이 있고 한글 날짜 문자열이면 필요
   if (!useMalgun && mapping.text && mapping.text.apply_date && hasNonAscii(data.apply_date)) {
     useMalgun = true;
   }
 
-  // 말굿은 필요한 경우에만 "서브셋" 임베드
   let malgun = helv;
   if (useMalgun && malgunPath) {
     try {
       malgun = await pdfDoc.embedFont(fs.readFileSync(malgunPath), { subset: true });
     } catch (e) {
       console.warn('malgun.ttf load failed:', e.message);
-      useMalgun = false; // 실패 시 헬베티카로 대체
+      useMalgun = false;
     }
   }
 
-  // 텍스트/체크박스/라인 렌더
+  // 렌더링
   if (mapping.text) {
     for (const [key, spots] of Object.entries(mapping.text)) {
       const val = data[key];
@@ -227,23 +289,23 @@ exports.handler = async (event) => {
       });
     }
   }
-  if (mapping.checkbox) {
-  for (const [compound, spots] of Object.entries(mapping.checkbox)) {
-    const parts = compound.includes('.') ? compound.split('.') : compound.split(':');
-    const field = parts[0], expect = parts[1] || '';
-    const v = data[field];
-    const match = (typeof v === "boolean") ? (v && expect === "true")
-                : (typeof v === "string")  ? (v.toLowerCase() === (expect||"").toLowerCase())
-                : (v === expect);
 
-    if (match) (spots || []).forEach(s => {
-      const page = pdfDoc.getPage((s.p || 1) - 1);
-      const font = (s.font && s.font.toLowerCase().includes("malgun")) ? malgun : helv;
-      // 기본은 'V', 필요하면 TOP.json에서 spot에 { "char": "✓" }처럼 덮어쓸 수 있음
-      drawCheck(page, s.x, s.y, s.size || 12, s.char || "V", font);
-    });
+  if (mapping.checkbox) {
+    for (const [compound, spots] of Object.entries(mapping.checkbox)) {
+      const parts = compound.includes('.') ? compound.split('.') : compound.split(':');
+      const field = parts[0], expect = parts[1] || '';
+      const v = data[field];
+      const match = (typeof v === "boolean") ? (v && expect === "true")
+                  : (typeof v === "string")  ? (v.toLowerCase() === (expect||"").toLowerCase())
+                  : (v === expect);
+
+      if (match) (spots || []).forEach(s => {
+        const page = pdfDoc.getPage((s.p || 1) - 1);
+        const font = (s.font && s.font.toLowerCase().includes("malgun")) ? malgun : helv;
+        drawCheck(page, s.x, s.y, s.size || 12, s.char || "V", font);
+      });
+    }
   }
-}
 
   if (mapping.lines) {
     (mapping.lines || []).forEach(s => {
