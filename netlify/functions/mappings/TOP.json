@@ -1,15 +1,8 @@
 {
-  "meta": {
-    "pdf": "template.pdf",
-    "previewW": 1299,
-    "previewH": 1841
-  },
-  "fields": {
-    "...": { "x": 100, "y": 200, "page": 1, "size": 10 }
-  },
-  "vmap": {
-    "prev_carrier.MVNO": { "x": 300, "y": 400, "page": 1, "size": 12 }
-  }
+  "meta": { "pdf": "template.pdf", "previewW": 1299, "previewH": 1841 },
+  "fields": { ... },
+  "vmap": { ... }
+}
 }
 {
   "fields": {
