@@ -1,16 +1,7 @@
 {
-  "meta": {
-    "pdf": "template.pdf",
-    "units": "pt",            // ← 좌표를 그대로(pt)로 사용
-    "yOrigin": "top",         // ← 스튜디오처럼 상단 기준
-    "previewW": 1299,         // (px 스케일 쓸 땐 채움)
-    "previewH": 1841,
-    "nudgeX": 0,
-    "nudgeY": 0
-  },
+  "meta": { "pdf": "template.pdf", "previewW": 1299, "previewH": 1841, "nudgeX": 0, "nudgeY": 0 },
 
   "fields": {
-    "...": { "x": 156, "y": 206, "size": 10, "page": 1, "source": ["addr_line1"], "type": "text" }
     "addr_line1_p1_1": { "x": 156, "y": 206, "size": 10, "page": 1, "source": ["addr_line1"], "type": "text" },
     "apply_date_p1_2": { "x": 225, "y": 812, "size": 11, "page": 1, "source": ["apply_date"], "type": "text" },
     "autopay_birth_p1_3": { "x": 428, "y": 269, "size": 10, "page": 1, "source": ["autopay_birth"], "type": "text" },
@@ -31,13 +22,12 @@
   },
 
   "vmap": {
-    "join_type:new":  { "x": 101, "y": 131, "size": 11, "page": 1 },
+    "join_type:new": { "x": 101, "y": 131, "size": 11, "page": 1 },
     "join_type:port": { "x": 149, "y": 131, "size": 11, "page": 1 },
-
-    "prev_carrier:sk":     { "x": 422, "y": 403, "size": 11, "page": 1 },
-    "prev_carrier:kt":     { "x": 450, "y": 403, "size": 11, "page": 1 },
-    "prev_carrier:lg u+":  { "x": 474, "y": 403, "size": 11, "page": 1 },
-    "prev_carrier:mvno":   { "x": 508, "y": 403, "size": 11, "page": 1 }
+    "prev_carrier:sk": { "x": 422, "y": 403, "size": 11, "page": 1 },
+    "prev_carrier:kt": { "x": 450, "y": 403, "size": 11, "page": 1 },
+    "prev_carrier:lg u+": { "x": 474, "y": 403, "size": 11, "page": 1 },
+    "prev_carrier:mvno": { "x": 508, "y": 403, "size": 11, "page": 1 }
   },
 
   "fixed_flags": {
