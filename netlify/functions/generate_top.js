@@ -11,7 +11,14 @@ function drawText(p, f, t, x, y, s = 10) {
   if (t == null) t = '';
   p.drawText(String(t), { x, y, size: s, font: f, color: rgb(0, 0, 0) });
 }
-function drawCheck(p, x, y, s = 12) { p.drawText('✓', { x, y, size: s, color: rgb(0, 0, 0) }); }
+// 기존
+// function drawCheck(page, x, y, size = 12) { page.drawText("✓", { x, y, size, color: rgb(0,0,0) }); }
+
+// 변경: 기본 문자를 'V'로, 필요하면 spot에 char/font도 줄 수 있게
+function drawCheck(page, x, y, size = 12, char = "V", font) {
+  page.drawText(String(char || "V"), { x, y, size, font, color: rgb(0, 0, 0) });
+}
+
 function drawLine(p, x1, y1, x2, y2, w = 1) {
   p.drawLine({ start: { x: x1, y: y1 }, end: { x: x2, y: y2 }, thickness: w, color: rgb(0, 0, 0) });
 }
@@ -221,16 +228,23 @@ exports.handler = async (event) => {
     }
   }
   if (mapping.checkbox) {
-    for (const [compound, spots] of Object.entries(mapping.checkbox)) {
-      const parts = compound.includes('.') ? compound.split('.') : compound.split(':');
-      const field = parts[0], expect = parts[1] || '';
-      const v = data[field];
-      const match = typeof v === 'boolean' ? (v && expect === 'true')
-                 : typeof v === 'string'  ? (v.toLowerCase() === (expect || '').toLowerCase())
-                 : (v === expect);
-      if (match) (spots || []).forEach(s => drawCheck(pdfDoc.getPage((s.p || 1) - 1), s.x, s.y, s.size || 12));
-    }
+  for (const [compound, spots] of Object.entries(mapping.checkbox)) {
+    const parts = compound.includes('.') ? compound.split('.') : compound.split(':');
+    const field = parts[0], expect = parts[1] || '';
+    const v = data[field];
+    const match = (typeof v === "boolean") ? (v && expect === "true")
+                : (typeof v === "string")  ? (v.toLowerCase() === (expect||"").toLowerCase())
+                : (v === expect);
+
+    if (match) (spots || []).forEach(s => {
+      const page = pdfDoc.getPage((s.p || 1) - 1);
+      const font = (s.font && s.font.toLowerCase().includes("malgun")) ? malgun : helv;
+      // 기본은 'V', 필요하면 TOP.json에서 spot에 { "char": "✓" }처럼 덮어쓸 수 있음
+      drawCheck(page, s.x, s.y, s.size || 12, s.char || "V", font);
+    });
   }
+}
+
   if (mapping.lines) {
     (mapping.lines || []).forEach(s => {
       const page = pdfDoc.getPage((s.p || 1) - 1);
