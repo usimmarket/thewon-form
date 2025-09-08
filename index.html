@@ -472,78 +472,102 @@
   applyLang('KR');
 </script>
 <script>
-// PATCH: PRINT ONLY — 인쇄/저장 동작만 조정 (디자인/레이아웃/텍스트 변경 없음)
+// PATCH: PRINT ONLY v2 — 인쇄 시 '프린트 자동실행'만 차단 (UI/레이아웃 불변)
 (function () {
   var PDF_FILE_NAME = 'THEONE_신청서.pdf';
 
-  // 공통: 버튼을 텍스트로 탐색(HTML 구조 수정 불필요)
+  // 버튼 텍스트로 탐색(구조 수정 없음)
   function findButtonByText(candidates) {
-    var buttons = Array.from(document.querySelectorAll('button, a, [role="button"], input[type="button"], input[type="submit"]'));
-    return buttons.find(function (el) {
+    var nodes = Array.from(document.querySelectorAll('button, a, [role="button"], input[type="button"], input[type="submit"]'));
+    return nodes.find(function (el) {
       var t = (el.innerText || el.value || '').replace(/\s+/g, '').toLowerCase();
       return candidates.some(function (c) { return t.includes(c); });
     }) || null;
   }
 
-  // 저장: 다음에 열릴 PDF를 새 탭 대신 '다운로드'로 전환
+  // 저장: 새 탭 대신 바로 다운로드
   function forceNextPdfOpenToDownload(filename) {
     var restored = false;
     var origOpen = window.open;
-
-    function restore() { if (restored) return; window.open = origOpen; restored = true; }
-    window.open = function(url) {
+    function restore(){ if (restored) return; restored = true; window.open = origOpen; }
+    window.open = function(url){
       try {
         if (typeof url === 'string' && (url.indexOf('blob:') === 0 || url.indexOf('data:application/pdf') === 0)) {
           var a = document.createElement('a');
           a.style.display = 'none';
-          a.href = url;
-          a.download = filename || 'document.pdf';
+          a.href = url; a.download = filename || 'document.pdf';
           document.body.appendChild(a); a.click(); requestAnimationFrame(function(){ a.remove(); });
-          restore(); return null; // 새 탭 열지 않음
+          restore(); return null;
         }
-      } catch (e) { /* 원동작 유지 */ }
+      } catch(e){}
       return origOpen.apply(window, arguments);
     };
     setTimeout(restore, 8000);
   }
 
-  // 인쇄: 현재창/자식창(print) 동시 무력화
-  function suppressPrintSequence(ms) {
+  // 인쇄: (1) 자동 프린트 파라미터 제거, (2) 부모/자식 print() 임시 무력화(백업)
+  function sanitizeNextOpenAndSuppressPrint(ms) {
     var duration = ms || 8000;
 
-    // 1) 현재 창의 window.print 임시 무력화
+    // 0) 현재창 print 차단(혹시 모를 직접 호출 대비)
     var origPrint = window.print;
     window.print = function(){ /* suppressed */ };
 
-    // 2) 바로 다음 window.open 으로 열린 "자식 창"의 .print()도 못 누르게 프록시 반환
-    var origOpen  = window.open;
-    var restored  = false;
-    function restore() {
+    // 1) 다음 window.open을 래핑해서 URL의 print 트리거 제거
+    var origOpen = window.open;
+    var restored = false;
+
+    function stripPrintParams(url) {
+      try {
+        var u = new URL(url, location.href);
+        // 흔한 키 제거
+        ['print','action','pdfjs.action','trigger','silentPrint'].forEach(function(k){
+          if (u.searchParams.has(k)) u.searchParams.delete(k);
+        });
+        // 값에 print가 들어있는 경우도 제거
+        u.searchParams.forEach(function(v,k){
+          if (String(v).toLowerCase().includes('print')) u.searchParams.delete(k);
+        });
+        // 해시(#)에서 print 관련 토큰 제거
+        if (u.hash) {
+          var h = u.hash.replace(/(^#|\b)(print|action=print|pdfjs\.action=print)\b/gi, '')
+                        .replace(/[?&]?(print|action=print|pdfjs\.action=print)(=[^&]*)?/gi, '');
+          u.hash = h;
+        }
+        return u.toString();
+      } catch(e) {
+        // 단순 문자열에서 대강 제거(크로스브라우저 백업)
+        return String(url).replace(/([?#&])(pdfjs\.action|action|print)=[^&#]*/gi,'$1')
+                          .replace(/#?print\b/gi,'');
+      }
+    }
+
+    function restore(){
       if (restored) return;
       restored = true;
       window.print = origPrint;
       window.open  = origOpen;
     }
-    window.open = function() {
-      var child = origOpen.apply(window, arguments);
+
+    window.open = function(url, name, feat){
+      var newUrl = url;
+      if (typeof url === 'string') newUrl = stripPrintParams(url);
+
+      var child = origOpen.call(window, newUrl, name, feat);
+
+      // 2) 혹시 부모가 child.print()를 직접 부르면 막음(백업)
       try {
-        // 자식창 레퍼런스에 대해 .print() 호출을 가로채는 Proxy
-        var proxy = new Proxy(child || {}, {
-          get: function(target, prop) {
-            if (prop === 'print') return function(){ /* suppressed (child) */ };
-            try { return target[prop]; } catch(e) { return undefined; }
-          },
-          set: function(target, prop, value) {
-            try { target[prop] = value; } catch(e) { /* cross-origin 무시 */ }
-            return true;
-          }
-        });
-        setTimeout(restore, duration);
-        return proxy;
-      } catch (e) {
-        setTimeout(restore, duration);
-        return child;
-      }
+        if (child) {
+          child.print = function(){ /* suppressed (child) */ };
+          // 자식이 같은 출처면, onload 시 다시 한 번 무력화(내부 스크립트 대비)
+          child.addEventListener && child.addEventListener('load', function(){
+            try { child.print = function(){}; } catch(e){}
+          });
+        }
+      } catch(e){ /* cross-origin이면 위 URL sanitize로 이미 대부분 해결됨 */ }
+
+      setTimeout(restore, duration);
+      return child;
     };
 
     setTimeout(restore, duration);
@@ -553,17 +577,17 @@
   var saveBtn  = findButtonByText(['pdf저장','저장(pdf)','pdfsave','savepdf']);
   var printBtn = findButtonByText(['인쇄','print']);
 
-  // 저장 버튼: 바로 다운로드
+  // 저장: 바로 다운로드
   if (saveBtn) {
-    saveBtn.addEventListener('click', function () {
+    saveBtn.addEventListener('click', function(){
       forceNextPdfOpenToDownload(PDF_FILE_NAME);
-    }, true); // 캡처 단계에서 선제 개입
+    }, true);
   }
 
-  // 인쇄 버튼: 프린트 다이얼로그 억제(자식창 print 포함)
+  // 인쇄: PDF는 새 탭으로 열리되, 프린트 다이얼로그는 뜨지 않게
   if (printBtn) {
-    printBtn.addEventListener('click', function () {
-      suppressPrintSequence(8000); // 8초 제한(다른 기능 영향 최소화)
+    printBtn.addEventListener('click', function(){
+      sanitizeNextOpenAndSuppressPrint(8000);
     }, true);
   }
 })();
