@@ -10,7 +10,7 @@
     "scaleX": 1.0,
     "scaleY": 1.0
   },
- "fields": {
+  "fields": {
     "addr_line1_p1_1": {
       "x": 158,
       "y": 192,
@@ -62,7 +62,7 @@
       "type": "text"
     },
     "autopay_exp_p1_6": {
-      "x": 1037,
+      "x": 1035,
       "y": 371,
       "size": 10,
       "page": 1,
@@ -83,7 +83,7 @@
     },
     "autopay_holder_p1_8": {
       "x": 271,
-      "y": 337,
+      "y": 338,
       "size": 10,
       "page": 1,
       "source": [
@@ -103,7 +103,7 @@
     },
     "mvno_name_p1_10": {
       "x": 1008,
-      "y": 623,
+      "y": 621,
       "size": 10,
       "page": 1,
       "source": [
@@ -122,9 +122,9 @@
       "type": "text"
     },
     "port_number_p1_12": {
-      "x": 213,
+      "x": 218,
       "y": 623,
-      "size": 13,
+      "size": 15,
       "page": 1,
       "source": [
         "port_number"
@@ -143,7 +143,7 @@
     },
     "subscriber_name_p1_14": {
       "x": 136,
-      "y": 102,
+      "y": 105,
       "size": 10,
       "page": 1,
       "source": [
@@ -190,32 +190,32 @@
       "page": 1
     },
     "join_type:port": {
-      "x": 146,
+      "x": 145,
       "y": 24,
       "size": 12,
       "page": 1
     },
     "prev_carrier:sk": {
       "x": 800,
-      "y": 623,
+      "y": 621,
       "size": 12,
       "page": 1
     },
     "prev_carrier:kt": {
       "x": 837,
-      "y": 623,
+      "y": 621,
       "size": 12,
       "page": 1
     },
     "prev_carrier:lg u+": {
       "x": 880,
-      "y": 623,
+      "y": 621,
       "size": 12,
       "page": 1
     },
     "prev_carrier:mvno": {
-      "x": 925,
-      "y": 623,
+      "x": 926,
+      "y": 621,
       "size": 12,
       "page": 1
     }
