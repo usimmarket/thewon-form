@@ -10,7 +10,7 @@
     "scaleX": 1.0,
     "scaleY": 1.0
   },
-  "fields": {
+   "fields": {
     "addr_line1_p1_1": {
       "x": 156,
       "y": 206,
@@ -23,7 +23,7 @@
     },
     "apply_date_p1_2": {
       "x": 243,
-      "y": 842,
+      "y": 1500,
       "size": 11,
       "page": 1,
       "source": [
