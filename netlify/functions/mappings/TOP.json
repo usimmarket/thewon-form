@@ -5,8 +5,8 @@
     "yOrigin": "top",
     "previewW": 1299,
     "previewH": 1841,
-    "nudgeX": 56.7,
-    "nudgeY": 85.0
+    "nudgeX": 0,
+    "nudgeY": 0
   },
   "fields": {
     "addr_line1_p1_1": { "x": 156, "y": 206, "size": 10, "page": 1, "source": ["addr_line1"], "type": "text" },
