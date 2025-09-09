@@ -10,7 +10,7 @@
     "scaleX": 1.0,
     "scaleY": 1.0
   },
-  "fields": {
+ "fields": {
     "addr_line1_p1_1": {
       "x": 158,
       "y": 192,
@@ -42,7 +42,7 @@
       "type": "text"
     },
     "autopay_number_p1_4": {
-      "x": 661,
+      "x": 677,
       "y": 371,
       "size": 10,
       "page": 1,
@@ -62,7 +62,7 @@
       "type": "text"
     },
     "autopay_exp_p1_6": {
-      "x": 982,
+      "x": 1000,
       "y": 371,
       "size": 10,
       "page": 1,
@@ -72,7 +72,7 @@
       "type": "text"
     },
     "autopay_org_p1_7": {
-      "x": 297,
+      "x": 307,
       "y": 371,
       "size": 11,
       "page": 1,
@@ -82,8 +82,8 @@
       "type": "text"
     },
     "autopay_holder_p1_8": {
-      "x": 276,
-      "y": 327,
+      "x": 271,
+      "y": 334,
       "size": 10,
       "page": 1,
       "source": [
@@ -92,7 +92,7 @@
       "type": "text"
     },
     "birth_p1_9": {
-      "x": 807,
+      "x": 822,
       "y": 102,
       "size": 10,
       "page": 1,
@@ -102,8 +102,8 @@
       "type": "text"
     },
     "mvno_name_p1_10": {
-      "x": 982,
-      "y": 625,
+      "x": 995,
+      "y": 623,
       "size": 10,
       "page": 1,
       "source": [
@@ -113,7 +113,7 @@
     },
     "plan_p1_11": {
       "x": 147,
-      "y": 150,
+      "y": 147,
       "size": 11,
       "page": 1,
       "source": [
@@ -123,7 +123,7 @@
     },
     "port_number_p1_12": {
       "x": 213,
-      "y": 625,
+      "y": 623,
       "size": 13,
       "page": 1,
       "source": [
@@ -173,7 +173,7 @@
     },
     "wish4_p1_17": {
       "x": 233,
-      "y": 282,
+      "y": 281,
       "size": 11,
       "page": 1,
       "source": [
@@ -184,14 +184,14 @@
   },
   "vmap": {
     "join_type:new": {
-      "x": -1,
-      "y": 30,
+      "x": -17,
+      "y": 26,
       "size": 11,
       "page": 1
     },
     "join_type:port": {
       "x": 76,
-      "y": 30,
+      "y": 26,
       "size": 11,
       "page": 1
     },
@@ -214,8 +214,8 @@
       "page": 1
     },
     "prev_carrier:mvno": {
-      "x": 915,
-      "y": 625,
+      "x": 922,
+      "y": 623,
       "size": 11,
       "page": 1
     }
