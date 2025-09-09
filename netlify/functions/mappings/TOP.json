@@ -42,7 +42,7 @@
       "type": "text"
     },
     "autopay_number_p1_4": {
-      "x": 684,
+      "x": 688,
       "y": 371,
       "size": 10,
       "page": 1,
@@ -62,7 +62,7 @@
       "type": "text"
     },
     "autopay_exp_p1_6": {
-      "x": 1012,
+      "x": 1037,
       "y": 371,
       "size": 10,
       "page": 1,
@@ -102,7 +102,7 @@
       "type": "text"
     },
     "mvno_name_p1_10": {
-      "x": 995,
+      "x": 1008,
       "y": 623,
       "size": 10,
       "page": 1,
@@ -184,39 +184,39 @@
   },
   "vmap": {
     "join_type:new": {
-      "x": 20,
+      "x": 56,
       "y": 24,
-      "size": 11,
+      "size": 12,
       "page": 1
     },
     "join_type:port": {
-      "x": 108,
+      "x": 146,
       "y": 24,
-      "size": 11,
+      "size": 12,
       "page": 1
     },
     "prev_carrier:sk": {
       "x": 800,
-      "y": 625,
-      "size": 11,
+      "y": 623,
+      "size": 12,
       "page": 1
     },
     "prev_carrier:kt": {
       "x": 837,
-      "y": 625,
-      "size": 11,
+      "y": 623,
+      "size": 12,
       "page": 1
     },
     "prev_carrier:lg u+": {
       "x": 880,
-      "y": 625,
-      "size": 11,
+      "y": 623,
+      "size": 12,
       "page": 1
     },
     "prev_carrier:mvno": {
-      "x": 922,
+      "x": 925,
       "y": 623,
-      "size": 11,
+      "size": 12,
       "page": 1
     }
   },
