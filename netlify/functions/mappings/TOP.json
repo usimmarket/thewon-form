@@ -12,7 +12,7 @@
   },
   "fields": {
     "addr_line1_p1_1": {
-      "x": 156,
+      "x": 158,
       "y": 192,
       "size": 10,
       "page": 1,
@@ -32,7 +32,7 @@
       "type": "text"
     },
     "autopay_birth_p1_3": {
-      "x": 697,
+      "x": 807,
       "y": 327,
       "size": 10,
       "page": 1,
@@ -42,8 +42,8 @@
       "type": "text"
     },
     "autopay_number_p1_4": {
-      "x": 646,
-      "y": 364,
+      "x": 661,
+      "y": 371,
       "size": 10,
       "page": 1,
       "source": [
@@ -52,8 +52,8 @@
       "type": "text"
     },
     "autopay_holder_p1_5": {
-      "x": 525,
-      "y": 423,
+      "x": 537,
+      "y": 436,
       "size": 10,
       "page": 1,
       "source": [
@@ -62,8 +62,8 @@
       "type": "text"
     },
     "autopay_exp_p1_6": {
-      "x": 920,
-      "y": 364,
+      "x": 982,
+      "y": 371,
       "size": 10,
       "page": 1,
       "source": [
@@ -72,9 +72,9 @@
       "type": "text"
     },
     "autopay_org_p1_7": {
-      "x": 285,
-      "y": 364,
-      "size": 10,
+      "x": 297,
+      "y": 371,
+      "size": 11,
       "page": 1,
       "source": [
         "autopay_org"
@@ -92,8 +92,8 @@
       "type": "text"
     },
     "birth_p1_9": {
-      "x": 750,
-      "y": 105,
+      "x": 807,
+      "y": 102,
       "size": 10,
       "page": 1,
       "source": [
@@ -102,8 +102,8 @@
       "type": "text"
     },
     "mvno_name_p1_10": {
-      "x": 930,
-      "y": 600,
+      "x": 982,
+      "y": 625,
       "size": 10,
       "page": 1,
       "source": [
@@ -112,7 +112,7 @@
       "type": "text"
     },
     "plan_p1_11": {
-      "x": 152,
+      "x": 147,
       "y": 150,
       "size": 11,
       "page": 1,
@@ -123,7 +123,7 @@
     },
     "port_number_p1_12": {
       "x": 213,
-      "y": 600,
+      "y": 625,
       "size": 13,
       "page": 1,
       "source": [
@@ -143,7 +143,7 @@
     },
     "subscriber_name_p1_14": {
       "x": 136,
-      "y": 105,
+      "y": 102,
       "size": 10,
       "page": 1,
       "source": [
@@ -163,7 +163,7 @@
     },
     "subscriber_name_p1_16": {
       "x": 562,
-      "y": 1400,
+      "y": 1475,
       "size": 10,
       "page": 1,
       "source": [
@@ -172,8 +172,8 @@
       "type": "text"
     },
     "wish4_p1_17": {
-      "x": 224,
-      "y": 279,
+      "x": 233,
+      "y": 282,
       "size": 11,
       "page": 1,
       "source": [
@@ -196,26 +196,26 @@
       "page": 1
     },
     "prev_carrier:sk": {
-      "x": 690,
-      "y": 600,
+      "x": 800,
+      "y": 625,
       "size": 11,
       "page": 1
     },
     "prev_carrier:kt": {
-      "x": 710,
-      "y": 600,
+      "x": 837,
+      "y": 625,
       "size": 11,
       "page": 1
     },
     "prev_carrier:lg u+": {
-      "x": 737,
-      "y": 600,
+      "x": 880,
+      "y": 625,
       "size": 11,
       "page": 1
     },
     "prev_carrier:mvno": {
-      "x": 780,
-      "y": 600,
+      "x": 915,
+      "y": 625,
       "size": 11,
       "page": 1
     }
