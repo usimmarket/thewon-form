@@ -10,7 +10,7 @@
     "scaleX": 1.0,
     "scaleY": 1.0
   },
-  "fields": {
+ "fields": {
     "addr_line1_p1_1": {
       "x": 158,
       "y": 192,
@@ -184,7 +184,7 @@
   },
   "vmap": {
     "join_type:new": {
-      "x": 47,
+      "x": 43,
       "y": 24,
       "size": 12,
       "page": 1
@@ -196,19 +196,19 @@
       "page": 1
     },
     "prev_carrier:sk": {
-      "x": 762,
+      "x": 741,
       "y": 621,
       "size": 12,
       "page": 1
     },
     "prev_carrier:kt": {
-      "x": 812,
+      "x": 791,
       "y": 621,
       "size": 12,
       "page": 1
     },
     "prev_carrier:lg u+": {
-      "x": 880,
+      "x": 859,
       "y": 621,
       "size": 12,
       "page": 1
