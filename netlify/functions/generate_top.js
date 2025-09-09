@@ -6,15 +6,99 @@ const { PDFDocument, StandardFonts, rgb } = require('pdf-lib');
 const fontkit = require('@pdf-lib/fontkit');
 const qs = require('querystring');
 
-/* ----------------------------- 공통 유틸 ----------------------------- */
-const hasNonAscii = (v) => /[^\x00-\x7F]/.test(String(v || ''));
-function firstExisting(cands) { for (const p of cands) { try { if (p && fs.existsSync(p)) return p; } catch {} } return null; }
+/* =========================
+   좌표/스케일 설정
+   - TOP.json의 meta에서 읽어옵니다.
+   - units: "px"(스튜디오 좌표) 또는 "pt"(PDF 포인트)
+   - yOrigin: "top"(스튜디오처럼 위가 0) / "bottom"(PDF 기본)
+   - previewW/H: 스튜디오 proof 크기(px)
+   - nudgeX/Y: 최종 pt에서 미세 보정(우/하 +)
+   ========================= */
+
+const DEFAULT_META = {
+  pdf: 'template.pdf',
+  units: 'px',          // 스튜디오 좌표가 기본
+  yOrigin: 'top',
+  previewW: 1299,
+  previewH: 1841,
+  nudgeX: 0,
+  nudgeY: 0
+};
+
+/* ---------- 좌표 변환 ---------- */
+function toX(page, x, meta) {
+  if (meta.units === 'px') {
+    const sx = page.getWidth() / meta.previewW;
+    return x * sx + meta.nudgeX;
+  }
+  // pt
+  return x + meta.nudgeX;
+}
+function toY(page, y, meta) {
+  if (meta.units === 'px') {
+    const sy = page.getHeight() / meta.previewH;
+    const yPt = y * sy;
+    const yTop = (meta.yOrigin || 'top') === 'top'
+      ? page.getHeight() - yPt
+      : yPt;
+    return yTop + meta.nudgeY;
+  }
+  // pt
+  const yPt = y;
+  const yTop = (meta.yOrigin || 'top') === 'top'
+    ? page.getHeight() - yPt
+    : yPt;
+  return yTop + meta.nudgeY;
+}
+// 텍스트는 베이스라인이어서 top 기준으로 조금 올려줍니다.
+function toYTop(page, y, font, size, meta) {
+  const yPdf = toY(page, y, meta);
+  const ascent = font ? font.ascentAtSize(size) : 0;
+  return yPdf - ascent;
+}
+
+/* ---------- draw helpers ---------- */
+function drawText(page, font, text, x, y, size = 10, meta) {
+  if (text == null) text = '';
+  page.drawText(String(text), {
+    x: toX(page, x, meta),
+    y: toYTop(page, y, font, size, meta),
+    size,
+    font,
+    color: rgb(0, 0, 0)
+  });
+}
+function drawCheck(page, x, y, size = 12, char = 'V', font, meta) {
+  page.drawText(String(char || 'V'), {
+    x: toX(page, x, meta),
+    y: toYTop(page, y, font, size, meta),
+    size,
+    font,
+    color: rgb(0, 0, 0)
+  });
+}
+function drawLine(page, x1, y1, x2, y2, w = 1, meta) {
+  page.drawLine({
+    start: { x: toX(page, x1, meta), y: toY(page, y1, meta) },
+    end:   { x: toX(page, x2, meta), y: toY(page, y2, meta) },
+    thickness: w,
+    color: rgb(0, 0, 0)
+  });
+}
+
+/* ---------- misc ---------- */
 function formatApplyDate(d) {
   const y = d.getFullYear(), m = d.getMonth() + 1, dd = String(d.getDate()).padStart(2, '0');
   return `신청일자 ${y}년 ${m}월 ${dd}일`;
 }
+function firstExisting(list) {
+  for (const p of list) {
+    try { if (p && fs.existsSync(p)) return p; } catch {}
+  }
+  return null;
+}
+const hasNonAscii = (v) => /[^\x00-\x7F]/.test(String(v || ''));
 
-/* 자동이체 보정 */
 function normalizeAutopay(d) {
   const m = (d.autopay_method || '').toLowerCase();
   if (m === 'card') {
@@ -37,9 +121,65 @@ function normalizeAutopay(d) {
   return d;
 }
 
-/* 입력 파싱 */
+/* ---------- mapping normalize ----------
+   - fields/vmap 형식 → text/checkbox로 변환
+   - meta의 모든 속성을 보존 (중요!)
+---------------------------------------- */
+function normalizeMapping(raw) {
+  if (!raw) return { meta: { ...DEFAULT_META }, text:{}, checkbox:{}, lines:[] };
+
+  // 이미 text/checkbox면 보존
+  if (raw.text || raw.checkbox || raw.lines) {
+    return {
+      meta: { ...DEFAULT_META, ...(raw.meta||{}) },
+      text: raw.text || {},
+      checkbox: raw.checkbox || {},
+      lines: raw.lines || []
+    };
+  }
+
+  const meta = { ...DEFAULT_META, ...(raw.meta || {}) };
+  const out = { meta, text:{}, checkbox:{}, lines:[] };
+
+  if (raw.fields) {
+    for (const [k, v] of Object.entries(raw.fields)) {
+      const key = (v.source && v.source[0]) || k;
+      (out.text[key] = out.text[key] || []).push({
+        p: +v.page || 1,
+        x: +v.x, y: +v.y,
+        size: +v.size || 10,
+        font: (v.font || 'malgun')
+      });
+    }
+  }
+  if (raw.vmap) {
+    for (const [comp, s] of Object.entries(raw.vmap)) {
+      const key = comp.includes('.') ? comp : comp.replace(':','.');
+      (out.checkbox[key] = out.checkbox[key] || []).push({
+        p: +s.page || 1,
+        x: +s.x, y: +s.y,
+        size: +s.size || 12,
+        char: s.char || 'V',
+        font: s.font || 'malgun'
+      });
+    }
+  }
+  if (Array.isArray(raw.lines)) {
+    out.lines = raw.lines.map(l => ({
+      p:+(l.p||l.page||1),
+      x1:+(l.x1||0), y1:+(l.y1||0),
+      x2:+(l.x2||0), y2:+(l.y2||0),
+      w:+(l.w||l.width||1)
+    }));
+  }
+  return out;
+}
+
+/* ---------- payload ---------- */
 function parseIncoming(event) {
-  const h = event.headers || {}; const ct = (h['content-type'] || h['Content-Type'] || '').toLowerCase();
+  const h = event.headers || {};
+  const ct = (h['content-type'] || h['Content-Type'] || '').toLowerCase();
+
   if (event.httpMethod === 'POST') {
     if (!event.body) return {};
     try { return JSON.parse(event.body); } catch {}
@@ -51,6 +191,7 @@ function parseIncoming(event) {
     const maybe = event.body.trim().replace(/^data=/,'');
     try { return JSON.parse(maybe); } catch { return {}; }
   }
+
   if (event.httpMethod === 'GET') {
     const q = event.queryStringParameters || {};
     if (q.data && typeof q.data === 'string') { try { return JSON.parse(q.data); } catch {} }
@@ -59,109 +200,11 @@ function parseIncoming(event) {
   return {};
 }
 
-/* 매핑 정규화: 스튜디오 내보내기를 text/checkbox 구조로 변환 */
-function normalizeMapping(raw) {
-  if (!raw) return { meta:{pdf:'template.pdf'}, text:{}, checkbox:{}, lines:[] };
-
-  // 이미 정규 형태
-  if (raw.text || raw.checkbox || raw.lines) {
-    raw.meta = Object.assign({ pdf:'template.pdf' }, (raw.meta || {}));
-    return raw;
-  }
-
-  const out = { meta: Object.assign({ pdf: 'template.pdf' }, (raw.meta || {})), text:{}, checkbox:{}, lines:[] };
-
-  if (raw.fields) {
-    for (const [k,v] of Object.entries(raw.fields)) {
-      const key = (v.source && v.source[0]) || k;
-      (out.text[key] = out.text[key] || []).push({
-        p:+v.page||1, x:+v.x, y:+v.y, size:+v.size||10, font:(v.font||'malgun')
-      });
-    }
-  }
-
-  if (raw.vmap) {
-    for (const [c,s] of Object.entries(raw.vmap)) {
-      const comp = c.includes('.') ? c : c.replace(':','.');
-      (out.checkbox[comp] = out.checkbox[comp] || []).push({
-        p:+s.page||1, x:+s.x, y:+s.y, size:+s.size||12, char:s.char
-      });
-    }
-  }
-
-  if (Array.isArray(raw.lines)) {
-    out.lines = raw.lines.map(l => ({
-      p:+(l.p||l.page||1), x1:+(l.x1||0), y1:+(l.y1||0), x2:+(l.x2||0), y2:+(l.y2||0), w:+(l.w||l.width||1)
-    }));
-  }
-
-  return out;
-}
-
-/* 좌표 변환기: TOP.json meta 에 따라 변환 */
-function makeTransformer(meta, page, font, size) {
-  const units   = String(meta.units || 'px').toLowerCase();   // 'px' | 'pt'
-  const yOrigin = String(meta.yOrigin || 'top').toLowerCase(); // 'top' | 'bottom'
-  const previewW = +meta.previewW || 0;
-  const previewH = +meta.previewH || 0;
-  const nudgeX   = +meta.nudgeX || 0;
-  const nudgeY   = +meta.nudgeY || 0;
-
-  const pw = page.getWidth();
-  const ph = page.getHeight();
-
-  const sx = (units === 'px' && previewW) ? (pw / previewW) : 1;
-  const sy = (units === 'px' && previewH) ? (ph / previewH) : 1;
-
-  const ascentAt = (font && font.ascentAtSize) ? (sz)=>font.ascentAtSize(sz) : ()=>0;
-
-  // x: 항상 좌측 기준
-  const tx = (xPxOrPt)=> xPxOrPt * sx + nudgeX;
-
-  // y (라인/점용): 원점 설정만 반영
-  const tyRaw = (yPxOrPt)=>{
-    const yScaled = yPxOrPt * sy;
-    if (yOrigin === 'top') return ph - yScaled + nudgeY;
-    return yScaled + nudgeY;
-  };
-
-  // y (텍스트용: 베이스라인 보정 포함)
-  const tyText = (yPxOrPt, sz)=> tyRaw(yPxOrPt) - ascentAt(sz || size || 10);
-
-  return { tx, tyRaw, tyText };
-}
-
-/* 그리기 */
-function drawText(page, font, txt, x, y, size, tr) {
-  page.drawText(String(txt ?? ''), {
-    x: tr.tx(x),
-    y: tr.tyText(y, size),
-    size: size || 10,
-    font,
-    color: rgb(0,0,0)
-  });
-}
-function drawCheck(page, x, y, size, char, font, tr) {
-  page.drawText(String(char || 'V'), {
-    x: tr.tx(x),
-    y: tr.tyText(y, size),
-    size: size || 12,
-    font,
-    color: rgb(0,0,0)
-  });
-}
-function drawLine(page, x1, y1, x2, y2, w, tr) {
-  page.drawLine({
-    start: { x: tr.tx(x1), y: tr.tyRaw(y1) },
-    end:   { x: tr.tx(x2), y: tr.tyRaw(y2) },
-    thickness: w || 1,
-    color: rgb(0,0,0)
-  });
-}
-
-/* ----------------------------- 핸들러 ----------------------------- */
+/* =========================
+   Netlify Handler
+   ========================= */
 exports.handler = async (event) => {
-  // CORS
+  // CORS preflight
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 200,
@@ -174,17 +217,21 @@ exports.handler = async (event) => {
     };
   }
 
-  // 빈 GET은 템플릿 반환(리디렉트)
+  // 빈 GET(쿼리 없음) → 템플릿 직접 보기(대용량 생성 방지)
   const qsParams = event.queryStringParameters || {};
   if (event.httpMethod === 'GET' && Object.keys(qsParams).length === 0) {
     return {
       statusCode: 302,
-      headers: { Location: '/template.pdf', 'Access-Control-Allow-Origin':'*', 'Cache-Control':'no-store' },
+      headers: {
+        Location: '/template.pdf',
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'no-store'
+      },
       body: ''
     };
   }
 
-  // 데이터
+  // 입력 파싱
   const payload = parseIncoming(event);
   const data = { ...(payload.data || payload || {}) };
   if (!data.apply_date) data.apply_date = formatApplyDate(new Date());
@@ -197,18 +244,16 @@ exports.handler = async (event) => {
   const mappingPath = path.join(__fn, 'mappings', 'TOP.json');
 
   // 매핑 로드
-  let mapping = { meta:{pdf:'template.pdf'}, text:{}, checkbox:{}, lines:[] };
+  let mapping = { meta:{...DEFAULT_META}, text:{}, checkbox:{}, lines:[] };
   try {
     if (fs.existsSync(mappingPath)) {
       const raw = JSON.parse(fs.readFileSync(mappingPath, 'utf-8'));
       mapping = normalizeMapping(raw);
     }
-  } catch (e) {
-    console.warn('Mapping parse error:', e.message);
-  }
+  } catch (e) { console.warn('Mapping parse error:', e.message); }
 
   // 템플릿/폰트
-  const pdfRel  = (mapping.meta && mapping.meta.pdf) || 'template.pdf';
+  const pdfRel = (mapping.meta && mapping.meta.pdf) || 'template.pdf';
   const pdfPath = firstExisting([
     path.join(repoRoot, pdfRel),
     path.join(__fn, pdfRel),
@@ -234,19 +279,24 @@ exports.handler = async (event) => {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
       body: JSON.stringify({
-        pdfPath, pdfSize: st ? st.size : null,
-        mappingPath, mappingMeta: mapping.meta,
-        malgunPath
+        pdfPath,
+        pdfSize: st ? st.size : null,
+        mappingPath,
+        mappingMeta: mapping.meta,
+        malgunPath,
+        units: mapping.meta.units,
+        yOrigin: mapping.meta.yOrigin
       })
     };
   }
 
-  // PDF
+  // PDF 생성
   const pdfDoc = await PDFDocument.load(baseBytes);
   pdfDoc.registerFontkit(fontkit);
+
   const helv = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-  // 말굿 필요 여부
+  // 말굿 사용 여부
   let useMalgun = false;
   if (mapping.text) {
     for (const [key, spots] of Object.entries(mapping.text)) {
@@ -262,11 +312,17 @@ exports.handler = async (event) => {
 
   let malgun = helv;
   if (useMalgun && malgunPath) {
-    try { malgun = await pdfDoc.embedFont(fs.readFileSync(malgunPath), { subset: true }); }
-    catch (e) { console.warn('malgun.ttf load failed:', e.message); useMalgun = false; }
+    try {
+      malgun = await pdfDoc.embedFont(fs.readFileSync(malgunPath), { subset: true });
+    } catch (e) {
+      console.warn('malgun.ttf load failed:', e.message);
+      useMalgun = false;
+    }
   }
 
-  // 렌더링
+  const meta = mapping.meta || DEFAULT_META;
+
+  // 텍스트
   if (mapping.text) {
     for (const [key, spots] of Object.entries(mapping.text)) {
       const val = data[key];
@@ -274,35 +330,35 @@ exports.handler = async (event) => {
         const page = pdfDoc.getPage((s.p || 1) - 1);
         const wantsMalgun = (s.font || '').toLowerCase().includes('malgun');
         const font = (wantsMalgun && useMalgun) ? malgun : helv;
-        const tr = makeTransformer(mapping.meta || {}, page, font, s.size || 10);
-        drawText(page, font, val, +s.x, +s.y, s.size || 10, tr);
+        drawText(page, font, val, s.x, s.y, s.size || 10, meta);
       });
     }
   }
 
+  // 체크
   if (mapping.checkbox) {
     for (const [compound, spots] of Object.entries(mapping.checkbox)) {
-      const parts = compound.includes('.') ? compound.split('.') : compound.split(':');
-      const field = parts[0], expect = parts[1] || '';
+      const [field, expectRaw=''] = compound.includes('.') ? compound.split('.') : compound.split(':');
       const v = data[field];
+      const expect = String(expectRaw).toLowerCase();
+
       const match = (typeof v === "boolean") ? (v && expect === "true")
-                  : (typeof v === "string")  ? (v.toLowerCase() === (expect||"").toLowerCase())
-                  : (v === expect);
+                  : (typeof v === "string")  ? (v.toLowerCase() === expect)
+                  : (String(v).toLowerCase() === expect);
 
       if (match) (spots || []).forEach(s => {
         const page = pdfDoc.getPage((s.p || 1) - 1);
         const font = (s.font && s.font.toLowerCase().includes("malgun")) ? malgun : helv;
-        const tr = makeTransformer(mapping.meta || {}, page, font, s.size || 12);
-        drawCheck(page, +s.x, +s.y, s.size || 12, s.char || 'V', font, tr);
+        drawCheck(page, s.x, s.y, s.size || 12, s.char || "V", font, meta);
       });
     }
   }
 
+  // 라인
   if (mapping.lines) {
     (mapping.lines || []).forEach(s => {
       const page = pdfDoc.getPage((s.p || 1) - 1);
-      const tr = makeTransformer(mapping.meta || {}, page);
-      drawLine(page, +s.x1, +s.y1, +s.x2, +s.y2, s.w || 1, tr);
+      drawLine(page, s.x1, s.y1, s.x2, s.y2, s.w || 1, meta);
     });
   }
 
