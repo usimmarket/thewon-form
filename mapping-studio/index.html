@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>PDF 1:1 좌표 매핑 스튜디오 v3.3 (Batch Offset)</title>
+<title>PDF 1:1 좌표 매핑 스튜디오 v3.3 (Drag Move)</title>
 <style>
   :root{--bg:#0b1220;--panel:#0a1628;--card:#0e1a2e;--line:#153a59;--accent:#38bdf8;--text:#e5f2ff;--muted:#9fb4cf;}
   *{box-sizing:border-box}
@@ -26,10 +25,12 @@
   .pill{display:flex;gap:6px;align-items:center;border:1px dashed #2a517b;background:#091a2d;color:#d7eeff;padding:4px 6px;border-radius:999px;font-size:11px;margin:3px 3px 0 0}
   .pill small{opacity:.7}
   .toolbar{position:sticky; top:0; z-index:5; display:flex; gap:10px; align-items:center; padding:8px 12px; background:#07101c; border-bottom:1px solid #0b2540}
-  .stage{position:relative;padding:12px}
+  .stage{position:relative;padding:12px; user-select:none;}
   canvas{display:block;background:#fff;box-shadow:0 0 0 1px #0b2540;margin-top:16px}
-  .pin{position:absolute;pointer-events:none;background:#004e78;color:#e6f6ff;border:1px solid #5cc8ff;border-radius:8px;padding:2px 6px;font-size:11px;transform:translate(-50%,-100%);white-space:nowrap}
+  /* ⬇ 드래그 가능하도록 pointer-events/커서 추가 */
+  .pin{position:absolute;pointer-events:auto;cursor:grab;background:#004e78;color:#e6f6ff;border:1px solid #5cc8ff;border-radius:8px;padding:2px 6px;font-size:11px;transform:translate(-50%,-100%);white-space:nowrap}
   .pin.sel{background:#0ea5e9;color:#00111c;border-color:#8be4ff}
+  .pin.dragging{cursor:grabbing;opacity:.9}
   .cross{position:absolute;pointer-events:none;border-left:1px solid #ef4444;border-top:1px solid #ef4444;width:22px;height:22px;transform:translate(-11px,-11px)}
   .err{background:#3b1d1d;border:1px solid #7a2b2b;color:#ffdcdc;padding:8px;border-radius:8px;margin:8px 0;display:none;white-space:pre-wrap}
   .muted{color:#9fb4cf;font-size:12px}
@@ -43,7 +44,7 @@
 <body>
 <header>
   <h1>PDF 1:1 좌표 매핑 스튜디오 v3.3</h1>
-  <div class="muted">· 1pt = 1px · PDF 좌표 그대로 · ↑↓←→ 미세 이동 <span class="kbd">1pt</span></div>
+  <div class="muted">· 1pt = 1px · PDF 좌표 그대로 · ↑↓←→ 미세 이동 <span class="kbd">1pt</span> · 핀 드래그 이동 지원</div>
 </header>
 
 <div class="grid">
@@ -257,7 +258,7 @@
     }catch(e){ errBox('#errPdf','렌더링 오류: '+(e&&e.message?e.message:e)); }
   }
 
-  // ✅ 목록/캔버스에서 공통 선택 처리
+  // ✅ 선택 공통
   function selectPin(idx){
     const p = pins[idx];
     if (!p) return;
@@ -300,12 +301,16 @@
     const only=showOnlyThisPageEl.checked;
     pins.forEach((p,i)=>{
       if(only && p.page!==curPage) return;
-      const el=document.createElement('div'); el.className='pin'+(i===selectedIndex?' sel':'');
+      const el=document.createElement('div');
+      el.className='pin'+(i===selectedIndex?' sel':'');
 
       el.style.left=p.x+'px'; el.style.top=p.y+'px';
       el.textContent = p.type==='v' ? `✓ ${p.key}` :
                        p.type==='fix' ? `[${p.label}]` :
                        `${p.key}`;
+      el.dataset.idx = i;        // ⬅ 드래그용 인덱스
+      el.draggable = false;
+
       stage.appendChild(el);
     });
     renderLists();
@@ -317,7 +322,7 @@
   });
   c.addEventListener('mouseleave',()=>cross.style.display='none');
 
-  // Placement uses current visible page (curPage)
+  // 캔버스 클릭으로 배치
   c.addEventListener('click',e=>{
     if(!armed) return;
     const r=c.getBoundingClientRect(); const x=Math.round(e.clientX-r.left), y=Math.round(e.clientY-r.top);
@@ -346,13 +351,69 @@
     drawPins();
   });
 
-  // 가까운 핀 선택 (캔버스 클릭 시)
+  // 가까운 핀 선택 (캔버스/스테이지 클릭)
   stage.addEventListener('click',e=>{
+    const pinEl = e.target.closest('.pin');
+    if(pinEl){ // 이미 드래그 쪽에서 처리하므로 여기선 선택만
+      const idx = +pinEl.dataset.idx;
+      selectPin(idx);
+      return;
+    }
     const r=c.getBoundingClientRect(); const x=Math.round(e.clientX-r.left), y=Math.round(e.clientY-r.top);
     let best=-1, bestD=Infinity;
     pins.forEach((p,i)=>{ const dx=p.x-x, dy=p.y-y; const d=dx*dx+dy*dy; if(d<bestD){best=i; bestD=d;} });
     if(best>=0){ selectPin(best); }
   }, true);
+
+  // 🔻 드래그 이동 로직 -------------------------------------------------
+  const dragState = { active:false, idx:-1, offX:0, offY:0 };
+
+  function snapshot(){ undoStack.push(JSON.parse(JSON.stringify(pins))); if(undoStack.length>20) undoStack.shift(); }
+
+  stage.addEventListener('mousedown', (e)=>{
+    const pinEl = e.target.closest('.pin');
+    if(!pinEl) return;
+    e.preventDefault();
+    const idx = +pinEl.dataset.idx;
+    selectPin(idx);              // 선택 동기화
+    snapshot();                  // 되돌리기용 저장
+
+    const rect = c.getBoundingClientRect();
+    const mouseX = Math.round(e.clientX - rect.left);
+    const mouseY = Math.round(e.clientY - rect.top);
+
+    dragState.active = true;
+    dragState.idx = idx;
+    dragState.offX = pins[idx].x - mouseX;   // 커서와 핀 좌표의 차이 고정
+    dragState.offY = pins[idx].y - mouseY;
+
+    pinEl.classList.add('dragging');
+  });
+
+  document.addEventListener('mousemove', (e)=>{
+    if(!dragState.active) return;
+    const rect = c.getBoundingClientRect();
+    const mx = Math.round(e.clientX - rect.left);
+    const my = Math.round(e.clientY - rect.top);
+
+    const p = pins[dragState.idx];
+    p.x = Math.max(0, Math.min(c.width , mx + dragState.offX));
+    p.y = Math.max(0, Math.min(c.height, my + dragState.offY));
+
+    // 입력창 동기화 + 화면 갱신
+    $("#selX").value = p.x; $("#selY").value = p.y;
+    drawPins();
+  });
+
+  function endDrag(){
+    if(!dragState.active) return;
+    dragState.active = false;
+    dragState.idx = -1;
+    stage.querySelectorAll('.pin.dragging').forEach(el=>el.classList.remove('dragging'));
+  }
+  document.addEventListener('mouseup', endDrag);
+  document.addEventListener('mouseleave', endDrag);
+  // -------------------------------------------------------------------
 
   // Nudge & apply
   function nudge(dx,dy){ if(selectedIndex<0) return; const p=pins[selectedIndex]; p.x+=dx; p.y+=dy; $("#selX").value=p.x; $("#selY").value=p.y; drawPins(); }
@@ -482,7 +543,7 @@
     }catch(e){ errBox('#errHtml','index.html 로컬 로드 실패: '+(e&&e.message?e.message:e)); }
   });
 
-  // --- 체크박스/고정라벨 '추가' 버튼 동작 ---
+  // --- 체크박스/고정라벨 추가 ---
   const addOptBtn = document.getElementById('addOpt');
   if(addOptBtn){
     addOptBtn.addEventListener('click', ()=>{
@@ -531,12 +592,12 @@
   dx_cm.addEventListener('input', syncFromCm); dy_cm.addEventListener('input', syncFromCm);
   dx_pt.addEventListener('input', syncFromPt); dy_pt.addEventListener('input', syncFromPt);
 
-  function snapshot(){ undoStack.push(JSON.parse(JSON.stringify(pins))); if(undoStack.length>20) undoStack.shift(); }
   function applyOffset(filterFn){
     const dx = parseFloat(dx_pt.value||0);
     const dy = parseFloat(dy_pt.value||0);
     if(!dx && !dy) return;
-    snapshot();
+    undoStack.push(JSON.parse(JSON.stringify(pins)));
+    if(undoStack.length>20) undoStack.shift();
     pins.forEach(p=>{ if(!filterFn || filterFn(p)){ p.x = +(p.x + dx).toFixed(2); p.y = +(p.y + dy).toFixed(2);} });
     drawPins();
   }
@@ -554,8 +615,6 @@
 
   // Init
   setMode('text'); setInfo();
-  // 기본값: 보정 프리셋
-  dx_cm.value = (-1.5).toString(); dy_cm.value = (-1.7).toString(); syncFromCm();
 })();
 </script>
 </body>
