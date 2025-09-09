@@ -10,10 +10,10 @@
     "scaleX": 1.0,
     "scaleY": 1.0
   },
-   "fields": {
+ "fields": {
     "addr_line1_p1_1": {
       "x": 156,
-      "y": 206,
+      "y": 194,
       "size": 10,
       "page": 1,
       "source": [
@@ -22,8 +22,8 @@
       "type": "text"
     },
     "apply_date_p1_2": {
-      "x": 243,
-      "y": 1500,
+      "x": 260,
+      "y": 1512,
       "size": 11,
       "page": 1,
       "source": [
@@ -32,8 +32,8 @@
       "type": "text"
     },
     "autopay_birth_p1_3": {
-      "x": 428,
-      "y": 269,
+      "x": 484,
+      "y": 321,
       "size": 10,
       "page": 1,
       "source": [
@@ -42,8 +42,8 @@
       "type": "text"
     },
     "autopay_number_p1_4": {
-      "x": 399,
-      "y": 290,
+      "x": 487,
+      "y": 347,
       "size": 10,
       "page": 1,
       "source": [
@@ -52,8 +52,8 @@
       "type": "text"
     },
     "autopay_holder_p1_5": {
-      "x": 407,
-      "y": 332,
+      "x": 523,
+      "y": 397,
       "size": 10,
       "page": 1,
       "source": [
@@ -62,8 +62,8 @@
       "type": "text"
     },
     "autopay_exp_p1_6": {
-      "x": 553,
-      "y": 290,
+      "x": 700,
+      "y": 345,
       "size": 10,
       "page": 1,
       "source": [
@@ -72,8 +72,8 @@
       "type": "text"
     },
     "autopay_org_p1_7": {
-      "x": 225,
-      "y": 290,
+      "x": 239,
+      "y": 324,
       "size": 10,
       "page": 1,
       "source": [
@@ -82,8 +82,8 @@
       "type": "text"
     },
     "autopay_holder_p1_8": {
-      "x": 211,
-      "y": 269,
+      "x": 239,
+      "y": 294,
       "size": 10,
       "page": 1,
       "source": [
@@ -92,8 +92,8 @@
       "type": "text"
     },
     "birth_p1_9": {
-      "x": 464,
-      "y": 164,
+      "x": 595,
+      "y": 127,
       "size": 10,
       "page": 1,
       "source": [
@@ -102,8 +102,8 @@
       "type": "text"
     },
     "mvno_name_p1_10": {
-      "x": 543,
-      "y": 404,
+      "x": 800,
+      "y": 535,
       "size": 10,
       "page": 1,
       "source": [
@@ -112,8 +112,8 @@
       "type": "text"
     },
     "plan_p1_11": {
-      "x": 154,
-      "y": 185,
+      "x": 158,
+      "y": 159,
       "size": 11,
       "page": 1,
       "source": [
@@ -122,8 +122,8 @@
       "type": "text"
     },
     "port_number_p1_12": {
-      "x": 183,
-      "y": 403,
+      "x": 203,
+      "y": 536,
       "size": 12,
       "page": 1,
       "source": [
@@ -132,8 +132,8 @@
       "type": "text"
     },
     "sim_serial_p1_13": {
-      "x": 157,
-      "y": 226,
+      "x": 163,
+      "y": 242,
       "size": 10,
       "page": 1,
       "source": [
@@ -142,8 +142,8 @@
       "type": "text"
     },
     "subscriber_name_p1_14": {
-      "x": 154,
-      "y": 165,
+      "x": 136,
+      "y": 135,
       "size": 11,
       "page": 1,
       "source": [
@@ -152,8 +152,8 @@
       "type": "text"
     },
     "subscriber_name_p1_15": {
-      "x": 396,
-      "y": 813,
+      "x": 458,
+      "y": 1300,
       "size": 10,
       "page": 1,
       "source": [
@@ -162,8 +162,8 @@
       "type": "text"
     },
     "subscriber_name_p1_16": {
-      "x": 398,
-      "y": 842,
+      "x": 458,
+      "y": 1470,
       "size": 10,
       "page": 1,
       "source": [
@@ -172,8 +172,8 @@
       "type": "text"
     },
     "wish4_p1_17": {
-      "x": 190,
-      "y": 248,
+      "x": 199,
+      "y": 262,
       "size": 10,
       "page": 1,
       "source": [
@@ -184,38 +184,38 @@
   },
   "vmap": {
     "join_type:new": {
-      "x": 101,
-      "y": 131,
+      "x": 45,
+      "y": 51,
       "size": 11,
       "page": 1
     },
     "join_type:port": {
-      "x": 149,
-      "y": 131,
+      "x": 87,
+      "y": 51,
       "size": 11,
       "page": 1
     },
     "prev_carrier:sk": {
-      "x": 422,
-      "y": 403,
+      "x": 670,
+      "y": 535,
       "size": 11,
       "page": 1
     },
     "prev_carrier:kt": {
-      "x": 450,
-      "y": 403,
+      "x": 700,
+      "y": 535,
       "size": 11,
       "page": 1
     },
     "prev_carrier:lg u+": {
-      "x": 474,
-      "y": 403,
+      "x": 730,
+      "y": 535,
       "size": 11,
       "page": 1
     },
     "prev_carrier:mvno": {
-      "x": 508,
-      "y": 403,
+      "x": 750,
+      "y": 535,
       "size": 11,
       "page": 1
     }
