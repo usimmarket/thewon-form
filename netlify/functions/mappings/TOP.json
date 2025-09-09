@@ -142,8 +142,8 @@
       "type": "text"
     },
     "subscriber_name_p1_14": {
-      "x": 136,
-      "y": 105,
+      "x": 134,
+      "y": 107,
       "size": 10,
       "page": 1,
       "source": [
@@ -184,7 +184,7 @@
   },
   "vmap": {
     "join_type:new": {
-      "x": 56,
+      "x": 47,
       "y": 24,
       "size": 12,
       "page": 1
@@ -196,13 +196,13 @@
       "page": 1
     },
     "prev_carrier:sk": {
-      "x": 800,
+      "x": 762,
       "y": 621,
       "size": 12,
       "page": 1
     },
     "prev_carrier:kt": {
-      "x": 837,
+      "x": 812,
       "y": 621,
       "size": 12,
       "page": 1
