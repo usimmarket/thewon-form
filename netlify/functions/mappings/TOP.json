@@ -1,12 +1,14 @@
 {
   "meta": {
     "pdf": "template.pdf",
-    "units": "pt",
+    "units": "px",
     "yOrigin": "top",
     "previewW": 1299,
     "previewH": 1841,
     "nudgeX": 0,
-    "nudgeY": 0
+    "nudgeY": 0,
+    "scaleX": 1.0,
+    "scaleY": 1.0
   },
   "fields": {
     "addr_line1_p1_1": { "x":156, "y":206, "size":10, "page":1, "source":["addr_line1"], "type":"text" },
@@ -28,10 +30,10 @@
     "wish4_p1_17": { "x":190, "y":248, "size":10, "page":1, "source":["wish4"], "type":"text" }
   },
   "vmap": {
-    "join_type:new": { "x":101, "y":131, "size":11, "page":1 },
-    "join_type:port": { "x":149, "y":131, "size":11, "page":1 },
-    "prev_carrier:sk": { "x":422, "y":403, "size":11, "page":1 },
-    "prev_carrier:kt": { "x":450, "y":403, "size":11, "page":1 },
+    "join_type:new":   { "x":101, "y":131, "size":11, "page":1 },
+    "join_type:port":  { "x":149, "y":131, "size":11, "page":1 },
+    "prev_carrier:sk":   { "x":422, "y":403, "size":11, "page":1 },
+    "prev_carrier:kt":   { "x":450, "y":403, "size":11, "page":1 },
     "prev_carrier:lg u+": { "x":474, "y":403, "size":11, "page":1 },
     "prev_carrier:mvno": { "x":508, "y":403, "size":11, "page":1 }
   },
