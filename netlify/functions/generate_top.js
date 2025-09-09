@@ -51,6 +51,7 @@ function toPtY(page, y) {
   return (fromTop ? (h - yScaled) : yScaled) + NUDGE_Y;
 }
 
+// ✅ 글자/체크 모두 '베이스라인' 기준으로 렌더 (줄 붙는 현상 방지)
 function drawText(p, f, t, x, y, size = 10) {
   p.drawText(String(t ?? ''), { x: toPtX(p, x), y: toPtY(p, y), size, font: f, color: rgb(0,0,0) });
 }
