@@ -6,24 +6,23 @@ const { PDFDocument, StandardFonts, rgb } = require('pdf-lib');
 const fontkit = require('@pdf-lib/fontkit');
 const qs = require('querystring');
 
-/* ===== 기본 메타(필요 시 TOP.json이 덮어씀) ===== */
 const DEFAULT_META = {
   pdf: 'template.pdf',
-  units: 'px',         // 스튜디오 좌표(px) 사용
-  yOrigin: 'top',      // 스튜디오처럼 위가 0
+  units: 'px',
+  yOrigin: 'top',
   previewW: 1299,
   previewH: 1841,
   nudgeX: 0,
   nudgeY: 0
 };
 
-/* ===== 좌표 변환 ===== */
+/* ---------- 좌표 변환 ---------- */
 function toX(page, x, meta) {
   if ((meta.units || 'px') === 'px') {
     const sx = page.getWidth() / meta.previewW;
     return x * sx + (meta.nudgeX || 0);
   }
-  return x + (meta.nudgeX || 0); // pt
+  return x + (meta.nudgeX || 0);
 }
 function toY(page, y, meta) {
   const originTop = (meta.yOrigin || 'top') === 'top';
@@ -42,7 +41,7 @@ function toYTop(page, y, font, size, meta) {
   return yPdf - ascent;
 }
 
-/* ===== draw helpers ===== */
+/* ---------- helpers ---------- */
 function drawText(page, font, text, x, y, size = 10, meta) {
   if (text == null) text = '';
   page.drawText(String(text), {
@@ -66,9 +65,9 @@ function drawLine(page, x1, y1, x2, y2, w = 1, meta) {
   });
 }
 
-/* ===== 유틸 ===== */
-function formatApplyDate(d) {
-  const y = d.getFullYear(), m = d.getMonth()+1, dd = String(d.getDate()).padStart(2,'0');
+/* ---------- 유틸 ---------- */
+function formatApplyDate(d){
+  const y=d.getFullYear(), m=d.getMonth()+1, dd=String(d.getDate()).padStart(2,'0');
   return `신청일자 ${y}년 ${m}월 ${dd}일`;
 }
 function firstExisting(list){ for(const p of list){ try{ if(p && fs.existsSync(p)) return p; }catch{} } return null; }
@@ -95,7 +94,7 @@ function normalizeAutopay(d){
   return d;
 }
 
-/* ===== 매핑 정규화: meta 보존이 핵심 ===== */
+/* ---------- 매핑 정규화 ---------- */
 function normalizeMapping(raw){
   if(!raw) return { meta:{...DEFAULT_META}, text:{}, checkbox:{}, lines:[] };
 
@@ -135,7 +134,7 @@ function normalizeMapping(raw){
   return out;
 }
 
-/* ===== 요청 파싱 ===== */
+/* ---------- 요청 파싱 ---------- */
 function parseIncoming(event){
   const h = event.headers || {};
   const ct = (h['content-type']||h['Content-Type']||'').toLowerCase();
@@ -159,10 +158,9 @@ function parseIncoming(event){
   return {};
 }
 
-/* ===== Netlify handler ===== */
+/* ---------- Netlify handler ---------- */
 exports.handler = async (event) => {
   try {
-    // CORS
     if(event.httpMethod==='OPTIONS'){
       return { statusCode:200, headers:{
         'Access-Control-Allow-Origin':'*',
@@ -171,7 +169,6 @@ exports.handler = async (event) => {
       }, body:'' };
     }
 
-    // 빈 GET → 템플릿 리다이렉트
     const qsParams = event.queryStringParameters || {};
     if(event.httpMethod==='GET' && Object.keys(qsParams).length===0){
       return { statusCode:302, headers:{
@@ -182,17 +179,17 @@ exports.handler = async (event) => {
     const payload = parseIncoming(event);
     const data = { ...(payload.data || payload || {}) };
     if(!data.apply_date) data.apply_date = formatApplyDate(new Date());
-    if((data.prev_carrier||'').toUpperCase()!=='MVNO') data.mvno_name=''; // MVNO명 비활성
+    if((data.prev_carrier||'').toUpperCase()!=='MVNO') data.mvno_name='';
     normalizeAutopay(data);
 
-    const __fn = __dirname;                         // <repo>/netlify/functions
-    const repoRoot = path.resolve(__fn, '../../');  // <repo>/
+    const __fn = __dirname;
+    const repoRoot = path.resolve(__fn, '../../');
     const mappingPath = path.join(__fn, 'mappings', 'TOP.json');
 
-    // 매핑 로드 (JSON 문법 오류면 바로 에러 반환)
     if(!fs.existsSync(mappingPath)){
       return { statusCode:400, headers:{'Access-Control-Allow-Origin':'*'}, body:'TOP.json not found' };
     }
+
     let raw;
     try{
       raw = JSON.parse(fs.readFileSync(mappingPath,'utf-8'));
@@ -202,7 +199,6 @@ exports.handler = async (event) => {
     const mapping = normalizeMapping(raw);
     const meta = mapping.meta || DEFAULT_META;
 
-    // 디버그 메타 보기
     if(event.httpMethod==='GET' && qsParams.debug==='1'){
       return {
         statusCode:200,
@@ -248,10 +244,9 @@ exports.handler = async (event) => {
     let malgun=helv;
     if(useMalgun && malgunPath){
       try{ malgun = await pdfDoc.embedFont(fs.readFileSync(malgunPath), { subset:true }); }
-      catch(e){ /* 폰트 실패 시 헬베티카로 */ }
+      catch(e){ /* 폰트 실패시 헬베티카 */ }
     }
 
-    // 텍스트
     if(mapping.text){
       for(const [key, spots] of Object.entries(mapping.text)){
         const val = data[key];
@@ -263,7 +258,6 @@ exports.handler = async (event) => {
         });
       }
     }
-    // 체크
     if(mapping.checkbox){
       for(const [compound, spots] of Object.entries(mapping.checkbox)){
         const [field, expectRaw=''] = compound.includes('.') ? compound.split('.') : compound.split(':');
@@ -279,7 +273,6 @@ exports.handler = async (event) => {
         });
       }
     }
-    // 라인
     (mapping.lines||[]).forEach(s=>{
       const page = pdfDoc.getPage((s.p||1)-1);
       drawLine(page, s.x1, s.y1, s.x2, s.y2, s.w||1, meta);
@@ -299,11 +292,10 @@ exports.handler = async (event) => {
     };
 
   } catch (err) {
-    // 에러를 프론트에서 볼 수 있도록 메시지 반환
     return {
       statusCode:500,
       headers:{ 'Content-Type':'application/json','Access-Control-Allow-Origin':'*' },
-      body: JSON.stringify({ error: 'generate_top failed', message: String(err && err.message || err) })
+      body: JSON.stringify({ error:'generate_top failed', message: String(err && err.message || err) })
     };
   }
 };
