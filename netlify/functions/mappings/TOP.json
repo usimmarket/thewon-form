@@ -42,7 +42,7 @@
       "type": "text"
     },
     "autopay_number_p1_4": {
-      "x": 677,
+      "x": 684,
       "y": 371,
       "size": 10,
       "page": 1,
@@ -53,7 +53,7 @@
     },
     "autopay_holder_p1_5": {
       "x": 537,
-      "y": 436,
+      "y": 439,
       "size": 10,
       "page": 1,
       "source": [
@@ -62,7 +62,7 @@
       "type": "text"
     },
     "autopay_exp_p1_6": {
-      "x": 1000,
+      "x": 1012,
       "y": 371,
       "size": 10,
       "page": 1,
@@ -83,7 +83,7 @@
     },
     "autopay_holder_p1_8": {
       "x": 271,
-      "y": 334,
+      "y": 337,
       "size": 10,
       "page": 1,
       "source": [
@@ -113,7 +113,7 @@
     },
     "plan_p1_11": {
       "x": 147,
-      "y": 147,
+      "y": 145,
       "size": 11,
       "page": 1,
       "source": [
@@ -184,14 +184,14 @@
   },
   "vmap": {
     "join_type:new": {
-      "x": -17,
-      "y": 26,
+      "x": 20,
+      "y": 24,
       "size": 11,
       "page": 1
     },
     "join_type:port": {
-      "x": 76,
-      "y": 26,
+      "x": 108,
+      "y": 24,
       "size": 11,
       "page": 1
     },
