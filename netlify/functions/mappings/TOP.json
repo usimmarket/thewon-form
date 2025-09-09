@@ -184,7 +184,7 @@
   },
   "vmap": {
     "join_type:new": {
-      "x": 40,
+      "x": 39,
       "y": 24,
       "size": 12,
       "page": 1
@@ -202,13 +202,13 @@
       "page": 1
     },
     "prev_carrier:kt": {
-      "x": 797,
+      "x": 800,
       "y": 621,
       "size": 12,
       "page": 1
     },
     "prev_carrier:lg u+": {
-      "x": 856,
+      "x": 854,
       "y": 621,
       "size": 12,
       "page": 1
