@@ -584,5 +584,63 @@
   }
 })();
 </script>
+ <script>
+/* 신규일 때는 통신사/번호이동 관련 필드를 FormData에서 제외(=disabled)하고 값도 비움.
+   번호이동일 때만 다시 활성화. MVNO 선택 시에만 MVNO명 입력 활성화. */
+(function () {
+  const joinRadios = document.querySelectorAll('input[name="join_type"]');
+  const carrierSel = document.getElementById('prev_carrier');
+  const portRow    = document.getElementById('portrow');             // 번호이동 전용 섹션
+  const portNum    = document.getElementById('port_number');         // 번호이동할 번호
+  const mvnoBox    = document.getElementById('mvno_box');            // MVNO명 래퍼
+  const mvnoInput  = document.getElementById('mvno_name');           // MVNO명 입력
+
+  function isPort() {
+    const r = [...joinRadios].find(r => r.checked);
+    return (r && r.value === 'port');
+  }
+  function isMVNO() {
+    return ((carrierSel?.value || '').toUpperCase() === 'MVNO');
+  }
+
+  function updateUI() {
+    const port = isPort();
+
+    // 섹션 표시/숨김(기존 스타일 유지)
+    if (portRow) portRow.style.display = port ? '' : 'none';
+
+    // 활성/비활성
+    if (carrierSel) carrierSel.disabled = !port;
+    if (portNum)    portNum.disabled    = !port;
+
+    // 신규면 값도 비움(폼 제출에서 빠짐)
+    if (!port) {
+      if (carrierSel) carrierSel.value = '';    // 기본 SK가 실리지 않도록
+      if (portNum)    portNum.value    = '';
+      if (mvnoInput)  mvnoInput.value  = '';
+      if (mvnoInput)  mvnoInput.disabled = true;
+      if (mvnoBox)    mvnoBox.style.display = 'none';
+      return;
+    }
+
+    // 번호이동일 때: MVNO 선택 시에만 MVNO명 입력 가능
+    if (mvnoInput)  mvnoInput.disabled = !isMVNO();
+    if (mvnoBox)    mvnoBox.style.display = isMVNO() ? '' : 'none';
+    if (!isMVNO() && mvnoInput) mvnoInput.value = '';
+  }
+
+  // 라디오/셀렉트 변경 시 동기화
+  joinRadios.forEach(r => r.addEventListener('change', updateUI));
+  if (carrierSel) carrierSel.addEventListener('change', updateUI);
+
+  // 폼 제출 직전에도 한번 더 보정(어떤 수집 방식이든 안전)
+  const form = document.querySelector('form');
+  if (form) form.addEventListener('submit', updateUI);
+
+  // 초기 상태 반영
+  document.addEventListener('DOMContentLoaded', updateUI);
+  updateUI();
+})();
+</script> 
 </body>
 </html>
