@@ -36,12 +36,39 @@
   .btn{border:1px solid #0ea5b7;background:#0ea5b7;color:#fff;border-radius:10px;padding:10px 14px;cursor:pointer}
   .btn.outline{background:transparent;color:#e2e8f0;border-color:#475569}
   @media print{ header,.fixbar{display:none !important} main .wrap{padding:0} .card{box-shadow:none;border:none;padding:0;margin:0} }
-  .lbl-seller .t{display:none}
-html[lang="ko"], html[lang="KR"], html[lang="KO"] .lbl-seller .t-kr{display:inline}
-html[lang="en"], html[lang="US"] .lbl-seller .t-en{display:inline}
-html[lang="vn"], html[lang="vi"], html[lang="VN"] .lbl-seller .t-vn{display:inline}
-html[lang="th"], html[lang="TH"] .lbl-seller .t-th{display:inline}
-html[lang="km"], html[lang="kh"], html[lang="KH"] .lbl-seller .t-kh{display:inline}
+ /* 판매점명 라벨 다국어 표시 (스크립트 없이) */
+.lbl-seller .t { display:none; }
+
+/* ✅ 기본/한국어: lang이 없거나 "", kr/ko(대소문자)일 때 보이게 */
+html:not([lang]) .lbl-seller .t-kr,
+html[lang=""] .lbl-seller .t-kr,
+html[lang="kr"] .lbl-seller .t-kr,
+html[lang="KR"] .lbl-seller .t-kr,
+html[lang="ko"] .lbl-seller .t-kr,
+html[lang="KO"] .lbl-seller .t-kr { display:inline; }
+
+/* 영어 */
+html[lang="en"] .lbl-seller .t-en,
+html[lang="EN"] .lbl-seller .t-en,
+html[lang="us"] .lbl-seller .t-en,
+html[lang="US"] .lbl-seller .t-en { display:inline; }
+
+/* 베트남어 */
+html[lang="vn"] .lbl-seller .t-vn,
+html[lang="VN"] .lbl-seller .t-vn,
+html[lang="vi"] .lbl-seller .t-vn,
+html[lang="VI"] .lbl-seller .t-vn { display:inline; }
+
+/* 태국어 */
+html[lang="th"] .lbl-seller .t-th,
+html[lang="TH"] .lbl-seller .t-th { display:inline; }
+
+/* 크메르(캄보디아) */
+html[lang="kh"] .lbl-seller .t-kh,
+html[lang="KH"] .lbl-seller .t-kh,
+html[lang="km"] .lbl-seller .t-kh,
+html[lang="KM"] .lbl-seller .t-kh { display:inline; }
+
 </style>
 </head>
 <body>
