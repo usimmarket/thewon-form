@@ -10,7 +10,7 @@
     "scaleX": 1.0,
     "scaleY": 1.0
   },
-  "fields": {
+ "fields": {
     "addr_line1_p1_1": {
       "x": 158,
       "y": 192,
@@ -52,8 +52,8 @@
       "type": "text"
     },
     "autopay_holder_p1_5": {
-      "x": 692,
-      "y": 460,
+      "x": 695,
+      "y": 461,
       "size": 10,
       "page": 1,
       "source": [
@@ -112,7 +112,7 @@
       "type": "text"
     },
     "plan_p1_11": {
-      "x": 156,
+      "x": 158,
       "y": 145,
       "size": 10,
       "page": 1,
@@ -152,8 +152,8 @@
       "type": "text"
     },
     "subscriber_name_p1_15": {
-      "x": 664,
-      "y": 1326,
+      "x": 691,
+      "y": 1328,
       "size": 10,
       "page": 1,
       "source": [
@@ -162,7 +162,7 @@
       "type": "text"
     },
     "subscriber_name_p1_16": {
-      "x": 664,
+      "x": 691,
       "y": 1491,
       "size": 10,
       "page": 1,
@@ -182,7 +182,7 @@
       "type": "text"
     },
     "seller_name_p1_18": {
-      "x": 802,
+      "x": 799,
       "y": -2,
       "size": 12,
       "page": 1,
