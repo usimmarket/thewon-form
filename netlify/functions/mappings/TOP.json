@@ -10,7 +10,7 @@
     "scaleX": 1.0,
     "scaleY": 1.0
   },
-  "fields": {
+ "fields": {
     "addr_line1_p1_1": {
       "x": 158,
       "y": 192,
@@ -52,8 +52,8 @@
       "type": "text"
     },
     "autopay_holder_p1_5": {
-      "x": 620,
-      "y": 456,
+      "x": 692,
+      "y": 460,
       "size": 10,
       "page": 1,
       "source": [
@@ -82,7 +82,7 @@
       "type": "text"
     },
     "autopay_holder_p1_8": {
-      "x": 279,
+      "x": 282,
       "y": 338,
       "size": 10,
       "page": 1,
@@ -142,8 +142,8 @@
       "type": "text"
     },
     "subscriber_name_p1_14": {
-      "x": 149,
-      "y": 104,
+      "x": 154,
+      "y": 107,
       "size": 10,
       "page": 1,
       "source": [
@@ -152,8 +152,8 @@
       "type": "text"
     },
     "subscriber_name_p1_15": {
-      "x": 610,
-      "y": 1331,
+      "x": 664,
+      "y": 1326,
       "size": 10,
       "page": 1,
       "source": [
@@ -162,8 +162,8 @@
       "type": "text"
     },
     "subscriber_name_p1_16": {
-      "x": 610,
-      "y": 1496,
+      "x": 664,
+      "y": 1491,
       "size": 10,
       "page": 1,
       "source": [
