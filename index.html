@@ -1,4 +1,5 @@
 
+
 <!doctype html>
 <html lang="ko">
 <head>
@@ -35,6 +36,12 @@
   .btn{border:1px solid #0ea5b7;background:#0ea5b7;color:#fff;border-radius:10px;padding:10px 14px;cursor:pointer}
   .btn.outline{background:transparent;color:#e2e8f0;border-color:#475569}
   @media print{ header,.fixbar{display:none !important} main .wrap{padding:0} .card{box-shadow:none;border:none;padding:0;margin:0} }
+  .lbl-seller .t{display:none}
+html[lang="ko"], html[lang="KR"], html[lang="KO"] .lbl-seller .t-kr{display:inline}
+html[lang="en"], html[lang="US"] .lbl-seller .t-en{display:inline}
+html[lang="vn"], html[lang="vi"], html[lang="VN"] .lbl-seller .t-vn{display:inline}
+html[lang="th"], html[lang="TH"] .lbl-seller .t-th{display:inline}
+html[lang="km"], html[lang="kh"], html[lang="KH"] .lbl-seller .t-kh{display:inline}
 </style>
 </head>
 <body>
@@ -223,20 +230,20 @@
 <div class="card" id="seller-block">
   <div class="row">
     <div>
-      <label id="label_seller"
-             data-kr="판매점명"
-             data-en="Store Name"
-             data-us="Store Name"
-             data-vn="Tên cửa hàng"
-             data-th="ชื่อร้านค้า"
-             data-kh="ឈ្មោះហាង"
-             data-km="ឈ្មោះហាង">판매점명</label>
+      <label class="lbl-seller">
+        <span class="t t-kr">판매점명</span>
+        <span class="t t-en">Store Name</span>
+        <span class="t t-vn">Tên cửa hàng</span>
+        <span class="t t-th">ชื่อร้านค้า</span>
+        <span class="t t-kh">ឈ្មោះហាង</span>
+      </label>
       <input type="text" id="seller_name" name="seller_name" />
     </div>
     <div></div>
   </div>
 </div> 
       </section>
+
       <div class="fixbar">
         <div class="wrap">
           <button type="button" class="btn outline" id="resetBtn" data-i18n="reset">초기화</button>
@@ -658,43 +665,5 @@
   updateUI();
 })();
 </script> 
-<script>
-(function(){
-  function getLang(){
-    var v = '';
-    var r = document.querySelector(
-      '[name="lang"]:checked,[name*="language"]:checked,[name*="lang"]:checked'
-    );
-    if (r) v = (r.value || '').toUpperCase();
-    if (!v) {
-      var chip = document.querySelector('.chip.active');
-      if (chip) v = (chip.textContent || '').trim().toUpperCase();
-    }
-    if (!v) v = (document.documentElement.getAttribute('lang') || '').toUpperCase();
-    return v || 'KR';
-  }
-  function pick(el, lang){
-    var key = lang.toLowerCase();
-    var t = el.getAttribute('data-' + key);
-    if (!t && (lang === 'US' || lang === 'EN')) t = el.getAttribute('data-en') || el.getAttribute('data-us');
-    if (!t && (lang === 'KH' || lang === 'KM')) t = el.getAttribute('data-km') || el.getAttribute('data-kh');
-    return t || el.getAttribute('data-kr') || '판매점명';
-  }
-  function apply(){
-    var el = document.getElementById('label_seller');
-    if (!el) return;
-    el.textContent = pick(el, getLang());
-  }
-  ['click','change','input'].forEach(evt=>{
-    document.addEventListener(evt, apply, {passive:true});
-  });
-  if (window.MutationObserver){
-    new MutationObserver(apply).observe(document.body, {
-      subtree:true, childList:true, attributes:true, attributeFilter:['class','lang']
-    });
-  }
-  apply();
-})();
-</script>
 </body>
 </html>
