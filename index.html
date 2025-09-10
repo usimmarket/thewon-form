@@ -219,16 +219,60 @@
         <div class="seg">
           <label class="radio"><input type="checkbox" checked disabled><span><b data-i18n="intl_block">국제전화 발신 차단</b></span></label>
         </div>
-        <!-- 판매점명 (부가서비스 아래, 왼쪽 한 칸) -->
-<div class="card">
+       <!-- 판매점명 (부가서비스 아래, 왼쪽 한 칸) -->
+<div class="card" id="seller-block">
   <div class="row">
     <div>
-      <label for="seller_name">판매점명</label>
+      <!-- 언어별 라벨 문구를 data-*에 넣고, 아래 스크립트가 현재 언어에 맞춰 교체 -->
+      <label id="label_seller"
+             data-kr="판매점명"
+             data-us="Store Name"
+             data-vn="Tên cửa hàng"
+             data-th="ชื่อร้านค้า"
+             data-kh="ឈ្មោះហាង"
+             data-km="ឈ្មោះហាង">판매점명</label>
       <input type="text" id="seller_name" name="seller_name" />
     </div>
     <div></div>
   </div>
 </div>
+
+<script>
+/* 판매점명 라벨만 언어 토글에 맞춰 교체 (다른 코드엔 전혀 간섭하지 않음) */
+(function(){
+  function currentLang(){
+    try{
+      var chip=document.querySelector('.chip.active, .lang .active, .language .active');
+      if(chip){ var t=(chip.textContent||'').trim().toUpperCase(); if(t) return t; }
+      var r=document.querySelector('input[type="radio"][name*="lang"]:checked, input[type="radio"][name*="language"]:checked');
+      if(r){ return (r.value||'').trim().toUpperCase(); }
+      var hl=(document.documentElement.getAttribute('lang')||'').trim().toUpperCase();
+      if(hl) return hl;
+    }catch(e){}
+    return 'KR';
+  }
+  function apply(){
+    var el = document.getElementById('label_seller');
+    if(!el) return;
+    var lang = currentLang();
+    // US→EN, KH→KM 등 폴백 처리
+    var key = lang;
+    if(!el.dataset[key.toLowerCase()]){
+      if(lang==='US') key = 'EN';
+      if(lang==='KH') key = 'KM';
+    }
+    el.textContent = el.dataset[key.toLowerCase()] || el.dataset.kr || '판매점명';
+  }
+  // 사용자 조작/언어 전환/DOM 변경 시 반영
+  ['click','change','input'].forEach(evt=>{
+    document.addEventListener(evt, ()=>setTimeout(apply,0), {passive:true});
+  });
+  if('MutationObserver' in window){
+    new MutationObserver(apply).observe(document.body,{childList:true,subtree:true,attributes:true});
+  }
+  apply();
+})();
+</script>
       </section>
 
       <div class="fixbar">
