@@ -190,6 +190,16 @@
         "seller_name"
       ],
       "type": "text"
+    },
+    "port_number_p1_19": {
+      "x": 339,
+      "y": 406,
+      "size": 15,
+      "page": 1,
+      "source": [
+        "port_number"
+      ],
+      "type": "text"
     }
   },
   "vmap": {
