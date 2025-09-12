@@ -192,9 +192,9 @@
       "type": "text"
     },
     "port_number_p1_19": {
-      "x": 339,
-      "y": 406,
-      "size": 15,
+      "x": 346,
+      "y": 412,
+      "size": 10,
       "page": 1,
       "source": [
         "port_number"
