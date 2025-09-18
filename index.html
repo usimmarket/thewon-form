@@ -1,3 +1,6 @@
+
+
+
 <!doctype html>
 <html lang="ko">
 <head>
@@ -67,31 +70,6 @@ html[lang="KH"] .lbl-seller .t-kh,
 html[lang="km"] .lbl-seller .t-kh,
 html[lang="KM"] .lbl-seller .t-kh { display:inline; }
 
-<style>
-  /* --- Lang flags layout override --- */
-  .chips { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
-  .chips .lang-row { display: flex; gap: 6px; }
-  .chips .chip.flag { 
-    font-size: 18px; line-height: 1; padding: 6px 10px; 
-    border-radius: 14px; border: 1px solid #334155; background: transparent; 
-    cursor: pointer; user-select: none;
-  }
-  .chips .chip.flag:focus { outline: 2px solid #94a3b8; outline-offset: 2px; }
-  /* 선택 상태(원래 .chip.active 쓰시던 스타일을 이어받습니다) */
-  .chips .chip.flag.active { background:#94a3b8; color:#0f172a; border-color:#94a3b8; }
-</style>  
-<style>
-  /* ---- language flags: 2-row layout ---- */
-  .chips { display:flex; flex-direction:column; gap:6px; align-items:flex-end; }
-  .chips .lang-row { display:flex; gap:8px; }
-  .chips .chip.flag{
-    font-size:18px; line-height:1; padding:6px 10px;
-    border-radius:14px; border:1px solid #334155; background:transparent;
-    color:#cbd5e1; cursor:pointer; user-select:none;
-  }
-  .chips .chip.flag.active{ background:#94a3b8; color:#0f172a; border-color:#94a3b8; }
-</style>
-
 </style>
 </head>
 <body>
@@ -104,17 +82,12 @@ html[lang="KM"] .lbl-seller .t-kh { display:inline; }
       <span class="badge" data-i18n="partner_only">판매점 전용</span>
     </div>
     <div class="chips">
-  <button class="chip" data-lang="kr" title="한국어">🇰🇷</button>
-  <button class="chip" data-lang="us" title="English">🇺🇸</button>
-  <button class="chip" data-lang="vn" title="Tiếng Việt">🇻🇳</button>
-  <button class="chip" data-lang="th" title="ไทย">🇹🇭</button>
-  <button class="chip" data-lang="kh" title="ភាសាខ្មែរ">🇰🇭</button>
-  <button class="chip" data-lang="id" title="Bahasa Indonesia">🇮🇩</button>
-  <button class="chip" data-lang="mm" title="မြန်မာ">🇲🇲</button>
-  <button class="chip" data-lang="mn" title="Монгол">🇲🇳</button>
-  <button class="chip" data-lang="uz" title="Oʻzbekcha">🇺🇿</button>
-  <button class="chip" data-lang="cn" title="简体中文">🇨🇳</button>
-</div>
+      <button class="chip active" data-lang="KR">KR</button>
+      <button class="chip" data-lang="US">US</button>
+      <button class="chip" data-lang="VN">VN</button>
+      <button class="chip" data-lang="TH">TH</button>
+      <button class="chip" data-lang="KH">KH</button>
+    </div>
   </div>
 </header>
 
@@ -720,88 +693,5 @@ html[lang="KM"] .lbl-seller .t-kh { display:inline; }
   updateUI();
 })();
 </script> 
-<script>
-(function () {
-  // 기존 setLang이 없을 경우를 대비한 폴백 (이미 있으면 이건 무시됨)
-  window.setLang = window.setLang || function (code) {
-    console.log("[setLang] fallback:", code);
-    // 여기에 실제 다국어 전환 로직이 이미 있으시면 이 폴백은 쓰이지 않습니다.
-  };
-
-  // 두 줄(가로 행) 구성
-  const row1 = ['kr','us','vn','th','kh'];            // 1행
-  const row2 = ['id','mm','mn','uz','cn'];            // 2행 (인니/미얀마/몽골/우즈벡/중국)
-
-  // 코드 → 국기 이모지 매핑
-  const FLAG = {
-    kr:'🇰🇷', us:'🇺🇸', vn:'🇻🇳', th:'🇹🇭', kh:'🇰🇭',
-    id:'🇮🇩', mm:'🇲🇲', mn:'🇲🇳', uz:'🇺🇿', cn:'🇨🇳'
-  };
-
-  // .chips 컨테이너를 찾아 기존 텍스트 칩을 모두 국기 2행으로 교체
-  const host = document.querySelector('.chips');
-  if (!host) return;
-
-  host.innerHTML = ''; // 기존 KR/US 같은 텍스트 칩 제거
-
-  function buildRow(list) {
-    const row = document.createElement('div');
-    row.className = 'lang-row';
-    list.forEach(code => {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'chip flag';
-      b.title = code.toUpperCase();
-      b.setAttribute('aria-label', code.toUpperCase());
-      b.textContent = FLAG[code] || code.toUpperCase();
-      b.onclick = () => setLang(code);
-      row.appendChild(b);
-    });
-    return row;
-  }
-
-  host.appendChild(buildRow(row1)); // 1행(가로)
-  host.appendChild(buildRow(row2)); // 2행(가로)
-})();
-</script> 
-<script>
-(function () {
-  // 버튼 클릭 -> 기존 다국어 전환 함수 호출
-  function triggerLang(code){
-    var tried = false;
-    var cU = code.toUpperCase(), cL = code.toLowerCase();
-    var fns = [
-      ['setLang', cU], ['setLang', cL],
-      ['changeLang', cU], ['changeLang', cL],
-      ['changeLanguage', cU], ['changeLanguage', cL],
-      ['i18nSet', cU], ['i18nSet', cL]
-    ];
-    for (var i=0;i<fns.length;i++){
-      var fn = fns[i][0], arg = fns[i][1];
-      if (typeof window[fn] === 'function'){
-        tried = true;
-        try { window[fn](arg); } catch(e){ console.warn(e); }
-        break;
-      }
-    }
-    if(!tried){ console.warn('언어 전환 함수가 정의되어 있지 않습니다. setLang/changeLang 등을 확인하세요.'); }
-  }
-
-  var host = document.getElementById('langChips');
-  if(!host) return;
-
-  host.addEventListener('click', function(e){
-    var btn = e.target.closest('button[data-lang]');
-    if(!btn) return;
-    host.querySelectorAll('.chip.flag').forEach(function(b){ b.classList.remove('active'); });
-    btn.classList.add('active');
-    triggerLang(btn.dataset.lang);
-  });
-
-  // 초기 활성 표시(페이지 진입 시 기본 KR 가정, 다른 기본이 있으면 바꿔주세요)
-  var init = host.querySelector('[data-lang="KR"]'); 
-  if(init) init.classList.add('active');
-})();
-</script>  
 </body>
 </html>
