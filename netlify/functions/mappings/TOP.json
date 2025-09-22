@@ -52,8 +52,8 @@
       "type": "text"
     },
     "autopay_holder_p1_5": {
-      "x": 620,
-      "y": 456,
+      "x": 576,
+      "y": 428,
       "size": 10,
       "page": 1,
       "source": [
@@ -82,8 +82,8 @@
       "type": "text"
     },
     "autopay_holder_p1_8": {
-      "x": 279,
-      "y": 338,
+      "x": 271,
+      "y": 309,
       "size": 10,
       "page": 1,
       "source": [
@@ -92,7 +92,7 @@
       "type": "text"
     },
     "birth_p1_9": {
-      "x": 809,
+      "x": 822,
       "y": 102,
       "size": 10,
       "page": 1,
@@ -142,8 +142,8 @@
       "type": "text"
     },
     "subscriber_name_p1_14": {
-      "x": 149,
-      "y": 104,
+      "x": 141,
+      "y": 78,
       "size": 10,
       "page": 1,
       "source": [
@@ -152,8 +152,8 @@
       "type": "text"
     },
     "subscriber_name_p1_15": {
-      "x": 610,
-      "y": 1331,
+      "x": 606,
+      "y": 1293,
       "size": 10,
       "page": 1,
       "source": [
@@ -162,8 +162,8 @@
       "type": "text"
     },
     "subscriber_name_p1_16": {
-      "x": 610,
-      "y": 1496,
+      "x": 606,
+      "y": 1455,
       "size": 10,
       "page": 1,
       "source": [
@@ -178,16 +178,6 @@
       "page": 1,
       "source": [
         "wish4"
-      ],
-      "type": "text"
-    },
-    "seller_name_p1_18": {
-      "x": 820,
-      "y": 10,
-      "size": 12,
-      "page": 1,
-      "source": [
-        "seller_name"
       ],
       "type": "text"
     }
