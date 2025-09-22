@@ -180,6 +180,16 @@
         "wish4"
       ],
       "type": "text"
+       },
+    "seller_name_p1_18": {
+      "x": 799,
+      "y": -2,
+      "size": 12,
+      "page": 1,
+      "source": [
+        "seller_name"
+      ],
+      "type": "text"
     }
   },
   "vmap": {
