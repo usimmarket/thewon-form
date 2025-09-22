@@ -62,6 +62,85 @@ function drawLine(p, x1, y1, x2, y2, w = 1) {
   p.drawLine({ start:{ x:toPtX(p,x1), y:toPtY(p,y1) }, end:{ x:toPtX(p,x2), y:toPtY(p,y2) }, thickness:w, color: rgb(0,0,0) });
 }
 
+/* ===== WRAP (2줄 자동개행, 말줄임표 없음) ===== */
+const WRAP_CONFIG = {
+  subscriber_name: { maxWidth: 220, lineHeight: 12, maxLines: 2 },
+  autopay_holder:  { maxWidth: 220, lineHeight: 12, maxLines: 2 }
+};
+
+function widthToPt(page, w) {
+  const wpt = page.getWidth();
+  if (UNITS === 'pt') return (w * SCALE_X);
+  const sx = (wpt / PREVIEW_W) * SCALE_X;
+  return w * sx;
+}
+function heightToPt(page, h) {
+  const hpt = page.getHeight();
+  if (UNITS === 'pt') return (h * SCALE_Y);
+  const sy = (hpt / PREVIEW_H) * SCALE_Y;
+  return h * sy;
+}
+
+function splitToLinesNoEllipsis(text, font, size, maxWidthPt) {
+  const width = t => font.widthOfTextAtSize(t, size);
+  const tokens = String(text ?? '').split(/(\s+)/); // keep spaces
+  const lines = [];
+  let line = '';
+  for (const tk of tokens) {
+    if (width(line + tk) <= maxWidthPt) {
+      line += tk;
+    } else {
+      if (tk.trim() === '') {
+        lines.push(line);
+        line = '';
+        continue;
+      }
+      if (width(tk) > maxWidthPt) {
+        for (const ch of [...tk]) {
+          if (width(line + ch) <= maxWidthPt) {
+            line += ch;
+          } else {
+            lines.push(line);
+            line = ch;
+          }
+        }
+      } else {
+        lines.push(line);
+        line = tk;
+      }
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
+function layoutWrappedNoEllipsis(text, font, baseSize, maxWidthPt, maxLines) {
+  // 폰트 크기 축소 없이 2줄 래핑만 수행 (지시사항에 따라 단순 처리)
+  const lines = splitToLinesNoEllipsis(text, font, baseSize, maxWidthPt);
+  if (lines.length > maxLines) return lines.slice(0, maxLines);
+  return lines;
+}
+
+function drawWrapped2Lines(page, font, text, x, y, size, key) {
+  const cfg = WRAP_CONFIG[key];
+  if (!cfg) {
+    // fallback: single line
+    drawText(page, font, text, x, y, size);
+    return;
+  }
+  const ptX = toPtX(page, x);
+  const ptY0 = toPtY(page, y);
+  const maxWidthPt = widthToPt(page, cfg.maxWidth);
+  const lineHeightPt = heightToPt(page, cfg.lineHeight);
+  const lines = layoutWrappedNoEllipsis(text, font, size, maxWidthPt, cfg.maxLines || 2);
+  for (let i = 0; i < lines.length; i++) {
+    const yy = ptY0 - i * lineHeightPt;
+    page.drawText(String(lines[i] ?? ''), { x: ptX, y: yy, size, font, color: rgb(0,0,0) });
+  }
+}
+
+
+
 function formatApplyDate(d) {
   const y = d.getFullYear(), m = d.getMonth()+1, dd = String(d.getDate()).padStart(2,'0');
   return `신청일자 ${y}년 ${m}월 ${dd}일`;
@@ -256,7 +335,11 @@ exports.handler = async (event) => {
       const page = pdfDoc.getPage((s.p||1)-1);
       const wantsMalgun = (s.font||'').toLowerCase().includes('malgun');
       const font = (wantsMalgun && malgun) ? malgun : helv;
-      drawText(page, font, v, s.x, s.y, s.size||10);
+      if (key === 'subscriber_name' || key === 'autopay_holder') {
+        drawWrapped2Lines(page, font, v, s.x, s.y, s.size||10, key);
+      } else {
+        drawText(page, font, v, s.x, s.y, s.size||10);
+      }
     });
   }
 
