@@ -64,8 +64,8 @@ function drawLine(p, x1, y1, x2, y2, w = 1) {
 
 /* ===== WRAP (2줄 자동개행, 말줄임표 없음) ===== */
 const WRAP_CONFIG = {
-  subscriber_name: { maxWidth: 220, lineHeight: 12, maxLines: 2 },
-  autopay_holder:  { maxWidth: 220, lineHeight: 12, maxLines: 2 }
+  subscriber_name: { maxWidth: 280, lineHeight: 15, maxLines: 2 },
+  autopay_holder:  { maxWidth: 280, lineHeight: 15, maxLines: 2 }
 };
 
 function widthToPt(page, w) {
