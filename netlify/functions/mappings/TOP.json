@@ -52,8 +52,8 @@
       "type": "text"
     },
     "autopay_holder_p1_5": {
-      "x": 640,
-      "y": 443,
+      "x": 663,
+      "y": 446,
       "size": 10,
       "page": 1,
       "source": [
@@ -84,7 +84,7 @@
     "autopay_holder_p1_8": {
       "x": 272,
       "y": 314,
-      "size": 10,
+      "size": 9,
       "page": 1,
       "source": [
         "autopay_holder"
@@ -114,7 +114,7 @@
     "plan_p1_11": {
       "x": 147,
       "y": 145,
-      "size": 11,
+      "size": 10,
       "page": 1,
       "source": [
         "plan"
@@ -143,7 +143,7 @@
     },
     "subscriber_name_p1_14": {
       "x": 157,
-      "y": 85,
+      "y": 86,
       "size": 10,
       "page": 1,
       "source": [
@@ -152,7 +152,7 @@
       "type": "text"
     },
     "subscriber_name_p1_15": {
-      "x": 670,
+      "x": 704,
       "y": 1317,
       "size": 10,
       "page": 1,
@@ -162,8 +162,8 @@
       "type": "text"
     },
     "subscriber_name_p1_16": {
-      "x": 670,
-      "y": 1470,
+      "x": 704,
+      "y": 1475,
       "size": 10,
       "page": 1,
       "source": [
