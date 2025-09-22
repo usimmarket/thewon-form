@@ -52,7 +52,7 @@
       "type": "text"
     },
     "autopay_holder_p1_5": {
-      "x": 690,
+      "x": 697,
       "y": 451,
       "size": 10,
       "page": 1,
@@ -163,7 +163,7 @@
     },
     "subscriber_name_p1_16": {
       "x": 708,
-      "y": 1479,
+      "y": 1480,
       "size": 10,
       "page": 1,
       "source": [
