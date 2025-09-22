@@ -10,7 +10,7 @@
     "scaleX": 1.0,
     "scaleY": 1.0
   },
- "fields": {
+  "fields": {
     "addr_line1_p1_1": {
       "x": 158,
       "y": 192,
@@ -82,7 +82,7 @@
       "type": "text"
     },
     "autopay_holder_p1_8": {
-      "x": 277,
+      "x": 281,
       "y": 314,
       "size": 9,
       "page": 1,
