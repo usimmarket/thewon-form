@@ -93,6 +93,22 @@ html[lang="KM"] .lbl-seller .t-kh { display:inline; }
     <form id="form" novalidate>
       <input type="hidden" id="apply_date" name="apply_date" value=""/>
       <input type="hidden" id="birth" name="birth" value=""/>
+      <input type="hidden" id="contract_plan_name" name="contract_plan_name" value=""/>
+      <input type="hidden" id="contract_monthly_fee" name="contract_monthly_fee" value=""/>
+      <input type="hidden" id="contract_period" name="contract_period" value=""/>
+      <input type="hidden" id="contract_period_months" name="contract_period_months" value=""/>
+      <input type="hidden" id="contract_discount" name="contract_discount" value=""/>
+      <input type="hidden" id="contract_basic_payment" name="contract_basic_payment" value=""/>
+      <input type="hidden" id="contract_penalty_0_3" name="contract_penalty_0_3" value=""/>
+      <input type="hidden" id="contract_penalty_4_9" name="contract_penalty_4_9" value=""/>
+      <input type="hidden" id="contract_penalty_10_12" name="contract_penalty_10_12" value=""/>
+      <input type="hidden" id="contract_subscriber_name" name="contract_subscriber_name" value=""/>
+      <input type="hidden" id="contract_phone" name="contract_phone" value=""/>
+      <input type="hidden" id="contract_phone_mid" name="contract_phone_mid" value=""/>
+      <input type="hidden" id="contract_phone_last" name="contract_phone_last" value=""/>
+      <input type="hidden" id="contract_join_month" name="contract_join_month" value=""/>
+      <input type="hidden" id="contract_join_day" name="contract_join_day" value=""/>
+      <input type="hidden" id="contract_seller_name" name="contract_seller_name" value=""/>
 
       <section class="card">
         <h3 data-i18n="sec_plan">요금제</h3>
@@ -293,7 +309,10 @@ html[lang="KM"] .lbl-seller .t-kh { display:inline; }
       </label>
       <input type="text" id="seller_name" name="seller_name" />
     </div>
-    <div></div>
+    <div>
+      <label data-i18n="seller_staff_name">판매자명</label>
+      <input type="text" id="seller_staff_name" name="seller_staff_name" />
+    </div>
   </div>
 </div> 
       </section>
@@ -322,6 +341,53 @@ html[lang="KM"] .lbl-seller .t-kh { display:inline; }
     return `신청일자 ${y}년 ${m}월 ${dd}일`;
   }
   document.getElementById('apply_date').value = formatApplyDate(new Date());
+
+
+  // 약정형 2페이지 출력용 숨김 필드 동기화(화면 디자인 변경 없음)
+  const CONTRACT_PLAN_DATA = {
+    "★약정형★ TOP 7GB+1Mbps/17,600원": {name:"★약정형★ TOP 7GB+1Mbps", monthly:"35,750", period:"12개월", periodMonths:"12", discount:"18,150", basic:"17,600", p03:"33,000", p49:"66,000", p1012:"62,700"},
+    "★약정형★ TOP 15GB 기본 (밀리의서재)/23,100원": {name:"★약정형★ TOP 15GB 기본 (밀리의서재)", monthly:"44,000", period:"12개월", periodMonths:"12", discount:"20,900", basic:"23,100", p03:"33,000", p49:"66,000", p1012:"62,700"},
+    "★약정형★ TOP 100분15GB+3Mbps/26,400원": {name:"★약정형★ TOP 100분15GB+3Mbps", monthly:"56,100", period:"12개월", periodMonths:"12", discount:"29,700", basic:"26,400", p03:"33,000", p49:"66,000", p1012:"62,700"},
+    "★약정형★ TOP 300분15GB+3Mbps/29,700원": {name:"★약정형★ TOP 300분15GB+3Mbps", monthly:"60,500", period:"12개월", periodMonths:"12", discount:"30,800", basic:"29,700", p03:"49,500", p49:"99,000", p1012:"94,050"},
+    "★약정형★ Biz 누구나 U 659/36,300원": {name:"★약정형★ Biz 누구나 U 659", monthly:"65,890", period:"12개월", periodMonths:"12", discount:"29,590", basic:"36,300", p03:"49,500", p49:"99,000", p1012:"94,050"},
+    "★약정형★ TOP 데이터ON비디오/39,300원": {name:"★약정형★ TOP 데이터ON비디오", monthly:"69,000", period:"12개월", periodMonths:"12", discount:"29,700", basic:"39,300", p03:"49,500", p49:"99,000", p1012:"94,050"},
+    "★약정형★ TOP 5G 심플/45,900원": {name:"★약정형★ TOP 5G 심플", monthly:"69,000", period:"12개월", periodMonths:"12", discount:"23,100", basic:"45,900", p03:"49,500", p49:"99,000", p1012:"94,050"},
+    "★약정형★ TOP 5G 스페셜/52,700원": {name:"★약정형★ TOP 5G 스페셜", monthly:"78,000", period:"12개월", periodMonths:"12", discount:"25,300", basic:"52,700", p03:"49,500", p49:"99,000", p1012:"94,050"}
+  };
+  function setVal(id, val){ const el=document.getElementById(id); if(el) el.value = val || ''; }
+  function parseApplyMonthDay(){
+    const s = document.getElementById('apply_date')?.value || '';
+    const m = s.match(/(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일/);
+    const d = new Date();
+    return { month: String(m ? m[2] : d.getMonth()+1).padStart(2,'0'), day: String(m ? m[3] : d.getDate()).padStart(2,'0') };
+  }
+  function syncContractHiddenFields(){
+    const selected = document.getElementById('plan')?.value || '';
+    const info = CONTRACT_PLAN_DATA[selected];
+    setVal('contract_plan_name', info?.name || '');
+    setVal('contract_monthly_fee', info?.monthly || '');
+    setVal('contract_period', info?.period || '');
+    setVal('contract_period_months', info?.periodMonths || '');
+    setVal('contract_discount', info?.discount || '');
+    setVal('contract_basic_payment', info?.basic || '');
+    setVal('contract_penalty_0_3', info?.p03 || '');
+    setVal('contract_penalty_4_9', info?.p49 || '');
+    setVal('contract_penalty_10_12', info?.p1012 || '');
+    setVal('contract_subscriber_name', document.getElementById('subscriber_name')?.value || '');
+    const phone = (document.getElementById('port_number')?.value || '').replace(/\D/g,'');
+    setVal('contract_phone', phone);
+    setVal('contract_phone_mid', phone.length >= 10 ? phone.slice(3, phone.length-4) : '');
+    setVal('contract_phone_last', phone.length >= 4 ? phone.slice(-4) : '');
+    const md = parseApplyMonthDay();
+    setVal('contract_join_month', md.month);
+    setVal('contract_join_day', md.day);
+    setVal('contract_seller_name', document.getElementById('seller_staff_name')?.value || '');
+  }
+  ['plan','subscriber_name','port_number','seller_name','seller_staff_name'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.addEventListener('input', syncContractHiddenFields), el.addEventListener('change', syncContractHiddenFields);
+  });
+  syncContractHiddenFields();
+
 
   function updateJoinUI(){
     const isPort = document.querySelector('input[name="join_type"]:checked').value==='port';
@@ -408,6 +474,7 @@ html[lang="KM"] .lbl-seller .t-kh { display:inline; }
   }
 
   async function generatePDFBlob() {
+    if (typeof syncContractHiddenFields === 'function') syncContractHiddenFields();
     const form = document.getElementById('form');
     const data = Object.fromEntries(new FormData(form).entries());
     const resp = await fetch(fnUrl(), { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) });
@@ -474,7 +541,7 @@ html[lang="KM"] .lbl-seller .t-kh { display:inline; }
       sec_usim:"USIM", sim2:"USIM 일련번호",
       sec_pay:"자동이체", autopay_method:"방식", bank:"은행", card:"카드",
       autopay_holder:"예금주(카드주)", pay_birth:"생년월일", autopay_org:"은행명(카드사명)", autopay_number:"계좌번호(카드번호)", exp_ym:"유효기간(년/월)",
-      sec_addon:"부가서비스", intl_block:"국제전화 발신 차단",
+      sec_addon:"부가서비스", intl_block:"국제전화 발신 차단", seller_staff_name:"판매자명",
       reset:"초기화", save_pdf:"PDF 저장", print:"인쇄",
       caps_warn:"※대문자로작성/띄워쓰기 확인/오타 유의 해주시길바랍니다.",
       birth_ph:"6 또는 8자리 숫자", addr_ph:"도로명 주소", phone_ph:"숫자만", wish4_ph:"예: 1234"
@@ -488,7 +555,7 @@ html[lang="KM"] .lbl-seller .t-kh { display:inline; }
       sec_usim:"USIM", sim2:"USIM Serial",
       sec_pay:"Auto Debit", autopay_method:"Method", bank:"Bank", card:"Card",
       autopay_holder:"Account/Card Holder", pay_birth:"Birthdate", autopay_org:"Bank/Card Company", autopay_number:"Account/Card Number", exp_ym:"Expiry (YY/MM)",
-      sec_addon:"Add-on Service", intl_block:"Block International Outgoing",
+      sec_addon:"Add-on Service", intl_block:"Block International Outgoing", seller_staff_name:"Salesperson Name",
       reset:"Reset", save_pdf:"Save PDF", print:"Print",
       caps_warn:"Please use UPPERCASE, check spacing, and avoid typos.",
       birth_ph:"6 or 8 digits", addr_ph:"Street address", phone_ph:"Numbers only", wish4_ph:"Ex: 1234"
@@ -502,7 +569,7 @@ html[lang="KM"] .lbl-seller .t-kh { display:inline; }
       sec_usim:"USIM", sim2:"Số seri USIM",
       sec_pay:"Ghi nợ tự động", autopay_method:"Phương thức", bank:"Ngân hàng", card:"Thẻ",
       autopay_holder:"Chủ TK/Chủ thẻ", pay_birth:"Ngày sinh", autopay_org:"Ngân hàng/Cty thẻ", autopay_number:"Số TK/Số thẻ", exp_ym:"HSD (YY/MM)",
-      sec_addon:"Dịch vụ GTGT", intl_block:"Chặn gọi quốc tế",
+      sec_addon:"Dịch vụ GTGT", intl_block:"Chặn gọi quốc tế", seller_staff_name:"Tên nhân viên bán hàng",
       reset:"Khởi tạo", save_pdf:"Lưu PDF", print:"In",
       caps_warn:"Vui lòng viết HOA, kiểm tra khoảng trắng và tránh sai chính tả.",
       birth_ph:"6 hoặc 8 chữ số", addr_ph:"Địa chỉ đường", phone_ph:"Chỉ số", wish4_ph:"VD: 1234"
@@ -516,7 +583,7 @@ html[lang="KM"] .lbl-seller .t-kh { display:inline; }
       sec_usim:"USIM", sim2:"หมายเลขซีเรียล USIM",
       sec_pay:"หักบัญชีอัตโนมัติ", autopay_method:"วิธี", bank:"ธนาคาร", card:"บัตร",
       autopay_holder:"ผู้ถือบัญชี/บัตร", pay_birth:"วันเกิด", autopay_org:"ธนาคาร/บริษัทบัตร", autopay_number:"เลขบัญชี/เลขบัตร", exp_ym:"วันหมดอายุ (YY/MM)",
-      sec_addon:"บริการเสริม", intl_block:"บล็อกโทรออกต่างประเทศ",
+      sec_addon:"บริการเสริม", intl_block:"บล็อกโทรออกต่างประเทศ", seller_staff_name:"ชื่อพนักงานขาย",
       reset:"ล้าง", save_pdf:"บันทึก PDF", print:"พิมพ์",
       caps_warn:"กรุณาพิมพ์ตัวพิมพ์ใหญ่ ตรวจสอบช่องว่าง และหลีกเลี่ยงการสะกดผิด",
       birth_ph:"ตัวเลข 6 หรือ 8 หลัก", addr_ph:"ที่อยู่ถนน", phone_ph:"ตัวเลขเท่านั้น", wish4_ph:"เช่น: 1234"
@@ -530,7 +597,7 @@ html[lang="KM"] .lbl-seller .t-kh { display:inline; }
       sec_usim:"USIM", sim2:"លេខសៀរៀល USIM",
       sec_pay:"ដកប្រាក់ស្វ័យប្រវត្តិ", autopay_method:"វិធី", bank:"ធនាគារ", card:"កាត",
       autopay_holder:"ម្ចាស់គណនី/កាត", pay_birth:"DOB", autopay_org:"ធនាគារ/ក្រុមហ៊ុនកាត", autopay_number:"លេខគណនី/កាត", exp_ym:"ផុតកំណត់ (YY/MM)",
-      sec_addon:"សេវាបន្ថែម", intl_block:"បិទការហៅចេញអន្តរជាតិ",
+      sec_addon:"សេវាបន្ថែម", intl_block:"បិទការហៅចេញអន្តរជាតិ", seller_staff_name:"ឈ្មោះអ្នកលក់",
       reset:"កំណត់ឡើងវិញ", save_pdf:"រក្សាទុក PDF", print:"បោះពុម្ព",
       caps_warn:"សូមប្រើអក្សរធំ ពិនិត្យគន្លឹះវេន និងជៀសវាងកំហុសអក្ខរាវិរុទ្ធ",
       birth_ph:"៦ ឬ ៨ ខ្ទង់", addr_ph:"អាសយដ្ឋានផ្លូវ", phone_ph:"ត្រឹមតែលេខ", wish4_ph:"ឧ.: 1234"
