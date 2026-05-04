@@ -1,4 +1,15 @@
 {
+  "meta": {
+    "pdf": "template.pdf",
+    "units": "px",
+    "yOrigin": "top",
+    "previewW": 1299,
+    "previewH": 1841,
+    "nudgeX": 56.69,
+    "nudgeY": -85.04,
+    "scaleX": 1.0,
+    "scaleY": 1.0
+  },
   "fields": {
     "addr_line1_p1_1": {
       "x": 158,
@@ -40,7 +51,17 @@
       ],
       "type": "text"
     },
-    "autopay_exp_p1_5": {
+    "autopay_holder_p1_5": {
+      "x": 697,
+      "y": 451,
+      "size": 10,
+      "page": 1,
+      "source": [
+        "autopay_holder"
+      ],
+      "type": "text"
+    },
+    "autopay_exp_p1_6": {
       "x": 1035,
       "y": 371,
       "size": 10,
@@ -50,7 +71,7 @@
       ],
       "type": "text"
     },
-    "autopay_org_p1_6": {
+    "autopay_org_p1_7": {
       "x": 307,
       "y": 371,
       "size": 11,
@@ -60,7 +81,17 @@
       ],
       "type": "text"
     },
-    "birth_p1_7": {
+    "autopay_holder_p1_8": {
+      "x": 281,
+      "y": 314,
+      "size": 9,
+      "page": 1,
+      "source": [
+        "autopay_holder"
+      ],
+      "type": "text"
+    },
+    "birth_p1_9": {
       "x": 822,
       "y": 102,
       "size": 10,
@@ -70,7 +101,7 @@
       ],
       "type": "text"
     },
-    "mvno_name_p1_8": {
+    "mvno_name_p1_10": {
       "x": 1008,
       "y": 621,
       "size": 10,
@@ -80,7 +111,7 @@
       ],
       "type": "text"
     },
-    "plan_p1_9": {
+    "plan_p1_11": {
       "x": 158,
       "y": 145,
       "size": 10,
@@ -90,7 +121,7 @@
       ],
       "type": "text"
     },
-    "port_number_p1_10": {
+    "port_number_p1_12": {
       "x": 218,
       "y": 623,
       "size": 15,
@@ -100,7 +131,7 @@
       ],
       "type": "text"
     },
-    "sim_serial_p1_11": {
+    "sim_serial_p1_13": {
       "x": 162,
       "y": 237,
       "size": 11,
@@ -110,57 +141,7 @@
       ],
       "type": "text"
     },
-    "subscriber_name_p1_12": {
-      "x": 281,
-      "y": 314,
-      "size": 10,
-      "page": 1,
-      "source": [
-        "subscriber_name"
-      ],
-      "type": "text"
-    },
-    "subscriber_name_p1_13": {
-      "x": 708,
-      "y": 1317,
-      "size": 10,
-      "page": 1,
-      "source": [
-        "subscriber_name"
-      ],
-      "type": "text"
-    },
-    "subscriber_name_p2_14": {
-      "x": 708,
-      "y": 1480,
-      "size": 10,
-      "page": 2,
-      "source": [
-        "subscriber_name"
-      ],
-      "type": "text"
-    },
-    "wish4_p1_15": {
-      "x": 233,
-      "y": 281,
-      "size": 11,
-      "page": 1,
-      "source": [
-        "wish4"
-      ],
-      "type": "text"
-    },
-    "seller_name_p1_16": {
-      "x": 799,
-      "y": -2,
-      "size": 12,
-      "page": 1,
-      "source": [
-        "seller_name"
-      ],
-      "type": "text"
-    },
-    "subscriber_name_p1_17": {
+    "subscriber_name_p1_14": {
       "x": 157,
       "y": 86,
       "size": 10,
@@ -170,9 +151,9 @@
       ],
       "type": "text"
     },
-    "subscriber_name_p1_18": {
-      "x": 697,
-      "y": 451,
+    "subscriber_name_p1_15": {
+      "x": 708,
+      "y": 1317,
       "size": 10,
       "page": 1,
       "source": [
@@ -180,7 +161,7 @@
       ],
       "type": "text"
     },
-    "subscriber_name_p1_19": {
+    "subscriber_name_p1_16": {
       "x": 708,
       "y": 1480,
       "size": 10,
@@ -190,113 +171,23 @@
       ],
       "type": "text"
     },
-    "contract_plan_name_p2_20": {
-      "x": 172,
-      "y": 732,
-      "size": 15,
-      "page": 2,
+    "wish4_p1_17": {
+      "x": 233,
+      "y": 281,
+      "size": 11,
+      "page": 1,
       "source": [
-        "contract_plan_name"
+        "wish4"
       ],
       "type": "text"
     },
-    " seller_staff_name_p2_21": {
-      "x": 380,
-      "y": 1400,
-      "size": 15,
-      "page": 2,
+    "seller_name_p1_18": {
+      "x": 799,
+      "y": -2,
+      "size": 12,
+      "page": 1,
       "source": [
-        " seller_staff_name"
-      ],
-      "type": "text"
-    },
-    " contract_join_day_p2_22": {
-      "x": 783,
-      "y": 1345,
-      "size": 15,
-      "page": 2,
-      "source": [
-        " contract_join_day"
-      ],
-      "type": "text"
-    },
-    " contract_join_month_p2_23": {
-      "x": 693,
-      "y": 1345,
-      "size": 15,
-      "page": 2,
-      "source": [
-        " contract_join_month"
-      ],
-      "type": "text"
-    },
-    "contract_penalty_10_12_p2_24": {
-      "x": 691,
-      "y": 1153,
-      "size": 15,
-      "page": 2,
-      "source": [
-        "contract_penalty_10_12"
-      ],
-      "type": "text"
-    },
-    "contract_basic_payment_p2_25": {
-      "x": 691,
-      "y": 732,
-      "size": 15,
-      "page": 2,
-      "source": [
-        "contract_basic_payment"
-      ],
-      "type": "text"
-    },
-    "contract_discount_p2_26": {
-      "x": 495,
-      "y": 732,
-      "size": 15,
-      "page": 2,
-      "source": [
-        "contract_discount"
-      ],
-      "type": "text"
-    },
-    "contract_monthly_fee_p2_27": {
-      "x": 354,
-      "y": 732,
-      "size": 15,
-      "page": 2,
-      "source": [
-        "contract_monthly_fee"
-      ],
-      "type": "text"
-    },
-    "contract_basic_payment_p2_28": {
-      "x": 691,
-      "y": 842,
-      "size": 15,
-      "page": 2,
-      "source": [
-        "contract_basic_payment"
-      ],
-      "type": "text"
-    },
-    "contract_penalty_0_3_p2_29": {
-      "x": 691,
-      "y": 1040,
-      "size": 15,
-      "page": 2,
-      "source": [
-        "contract_penalty_0_3"
-      ],
-      "type": "text"
-    },
-    "contract_penalty_4_9_p2_30": {
-      "x": 691,
-      "y": 1097,
-      "size": 15,
-      "page": 2,
-      "source": [
-        "contract_penalty_4_9"
+        "seller_name"
       ],
       "type": "text"
     }
