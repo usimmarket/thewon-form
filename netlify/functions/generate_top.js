@@ -64,8 +64,14 @@ function drawLine(p, x1, y1, x2, y2, w = 1) {
 
 /* ===== WRAP (2줄 자동개행, 말줄임표 없음) ===== */
 const WRAP_CONFIG = {
-  subscriber_name: { maxWidth: 320, lineHeight: 22, maxLines: 2 },
-  autopay_holder:  { maxWidth: 320, lineHeight: 22, maxLines: 2 }
+  subscriber_name:          { maxWidth: 320, lineHeight: 22, maxLines: 2 },
+  contract_subscriber_name: { maxWidth: 320, lineHeight: 22, maxLines: 2 },
+  autopay_holder:           { maxWidth: 320, lineHeight: 22, maxLines: 2 },
+  seller_name:              { maxWidth: 260, lineHeight: 18, maxLines: 2 },
+  seller_staff_name:        { maxWidth: 260, lineHeight: 18, maxLines: 2 },
+  contract_seller_name:     { maxWidth: 260, lineHeight: 18, maxLines: 2 },
+  addr_line1:               { maxWidth: 420, lineHeight: 18, maxLines: 2 },
+  contract_plan_name:       { maxWidth: 360, lineHeight: 18, maxLines: 2 }
 };
 
 function widthToPt(page, w) {
@@ -227,6 +233,80 @@ function parseIncoming(event) {
   return {};
 }
 
+
+
+/* ===== 약정형 요금제 8종 자동 출력 데이터 ===== */
+const CONTRACT_PLAN_TABLE = {
+  "★약정형★ TOP 7GB+1Mbps/17,600원": {
+    name:"★약정형★ TOP 7GB+1Mbps", monthly:"35,750", period:"12개월", periodMonths:"12", discount:"18,150", basic:"17,600", p03:"33,000", p49:"66,000", p1012:"62,700"
+  },
+  "★약정형★ TOP 15GB 기본 (밀리의서재)/23,100원": {
+    name:"★약정형★ TOP 15GB 기본 (밀리의서재)", monthly:"44,000", period:"12개월", periodMonths:"12", discount:"20,900", basic:"23,100", p03:"33,000", p49:"66,000", p1012:"62,700"
+  },
+  "★약정형★ TOP 100분15GB+3Mbps/26,400원": {
+    name:"★약정형★ TOP 100분15GB+3Mbps", monthly:"56,100", period:"12개월", periodMonths:"12", discount:"29,700", basic:"26,400", p03:"33,000", p49:"66,000", p1012:"62,700"
+  },
+  "★약정형★ TOP 300분15GB+3Mbps/29,700원": {
+    name:"★약정형★ TOP 300분15GB+3Mbps", monthly:"60,500", period:"12개월", periodMonths:"12", discount:"30,800", basic:"29,700", p03:"49,500", p49:"99,000", p1012:"94,050"
+  },
+  "★약정형★ Biz 누구나 U 659/36,300원": {
+    name:"★약정형★ Biz 누구나 U 659", monthly:"65,890", period:"12개월", periodMonths:"12", discount:"29,590", basic:"36,300", p03:"49,500", p49:"99,000", p1012:"94,050"
+  },
+  "★약정형★ TOP 데이터ON비디오/39,300원": {
+    name:"★약정형★ TOP 데이터ON비디오", monthly:"69,000", period:"12개월", periodMonths:"12", discount:"29,700", basic:"39,300", p03:"49,500", p49:"99,000", p1012:"94,050"
+  },
+  "★약정형★ TOP 5G 심플/45,900원": {
+    name:"★약정형★ TOP 5G 심플", monthly:"69,000", period:"12개월", periodMonths:"12", discount:"23,100", basic:"45,900", p03:"49,500", p49:"99,000", p1012:"94,050"
+  },
+  "★약정형★ TOP 5G 스페셜/52,700원": {
+    name:"★약정형★ TOP 5G 스페셜", monthly:"78,000", period:"12개월", periodMonths:"12", discount:"25,300", basic:"52,700", p03:"49,500", p49:"99,000", p1012:"94,050"
+  }
+};
+function getContractPlanInfo(plan) {
+  const raw = String(plan || '').trim();
+  return CONTRACT_PLAN_TABLE[raw] || null;
+}
+function splitPhone(raw) {
+  const d = String(raw || '').replace(/\D/g, '');
+  if (d.length < 10) return { full:d, mid:'', last:'' };
+  return { full:d, mid:d.slice(3, -4), last:d.slice(-4) };
+}
+function extractApplyMonthDay(applyDate) {
+  const s = String(applyDate || '');
+  const m = s.match(/(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일/);
+  const d = new Date();
+  const mm = m ? m[2] : String(d.getMonth()+1);
+  const dd = m ? m[3] : String(d.getDate());
+  return { month:String(mm).padStart(2,'0'), day:String(dd).padStart(2,'0') };
+}
+function deriveContractFields(d) {
+  const info = getContractPlanInfo(d.plan);
+  d.__is_contract_plan = !!info;
+  if (!info) {
+    ['contract_plan_name','contract_monthly_fee','contract_period','contract_period_months','contract_discount','contract_basic_payment','contract_penalty_0_3','contract_penalty_4_9','contract_penalty_10_12','contract_subscriber_name','contract_phone','contract_phone_mid','contract_phone_last','contract_join_month','contract_join_day','contract_seller_name'].forEach(k=>d[k]='');
+    return d;
+  }
+  d.contract_plan_name = info.name;
+  d.contract_monthly_fee = info.monthly;
+  d.contract_period = info.period;
+  d.contract_period_months = info.periodMonths;
+  d.contract_discount = info.discount;
+  d.contract_basic_payment = info.basic;
+  d.contract_penalty_0_3 = info.p03;
+  d.contract_penalty_4_9 = info.p49;
+  d.contract_penalty_10_12 = info.p1012;
+  d.contract_subscriber_name = d.subscriber_name || '';
+  const ph = splitPhone(d.port_number);
+  d.contract_phone = ph.full;
+  d.contract_phone_mid = ph.mid;
+  d.contract_phone_last = ph.last;
+  const md = extractApplyMonthDay(d.apply_date);
+  d.contract_join_month = md.month;
+  d.contract_join_day = md.day;
+  d.contract_seller_name = d.seller_staff_name || '';
+  return d;
+}
+
 const hasNonAscii = v => /[^\x00-\x7F]/.test(String(v||''));
 
 /* ===== Netlify Function ===== */
@@ -256,6 +336,7 @@ exports.handler = async (event) => {
   if (!data.apply_date) data.apply_date = formatApplyDate(new Date());
   if ((data.prev_carrier || '').toUpperCase() !== 'MVNO') data.mvno_name = '';
   normalizeAutopay(data);
+  deriveContractFields(data);
 
   // 경로
   const __fn = __dirname;                        // <repo>/netlify/functions
@@ -313,6 +394,13 @@ exports.handler = async (event) => {
   pdfDoc.registerFontkit(fontkit);
   const helv = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
+  // 일반 요금제는 2페이지(무선서비스 계약 표준안내서)를 제거하여 5페이지 PDF로 생성
+  // 약정형 8종 선택 시에만 2페이지를 유지하여 6페이지 PDF로 생성
+  const isContractPlan = !!data.__is_contract_plan;
+  if (!isContractPlan && pdfDoc.getPageCount() >= 2) {
+    pdfDoc.removePage(1); // 0-index: 원본 2페이지 제거
+  }
+
   // 말굿 필요한지 판단해서 서브셋 임베드
   let useMalgun = false;
   for (const [k, spots] of Object.entries(mapping.text || {})) {
@@ -332,10 +420,12 @@ exports.handler = async (event) => {
   for (const [key, spots] of Object.entries(mapping.text || {})) {
     const v = data[key];
     (spots||[]).forEach(s => {
+      if (!isContractPlan && (s.p||1) === 2) return; // 제거된 2페이지 좌표는 출력 금지
+      if ((s.p||1) > pdfDoc.getPageCount()) return;
       const page = pdfDoc.getPage((s.p||1)-1);
       const wantsMalgun = (s.font||'').toLowerCase().includes('malgun');
       const font = (wantsMalgun && malgun) ? malgun : helv;
-      if (key === 'subscriber_name' || key === 'autopay_holder') {
+      if (WRAP_CONFIG[key]) {
         drawWrapped2Lines(page, font, v, s.x, s.y, s.size||10, key);
       } else {
         drawText(page, font, v, s.x, s.y, s.size||10);
@@ -350,6 +440,8 @@ exports.handler = async (event) => {
                 : (typeof v === 'string')  ? (v.toLowerCase() === String(expect).toLowerCase())
                 : (v === expect);
     if (match) (spots||[]).forEach(s => {
+      if (!isContractPlan && (s.p||1) === 2) return;
+      if ((s.p||1) > pdfDoc.getPageCount()) return;
       const page = pdfDoc.getPage((s.p||1)-1);
       const font = (s.font && s.font.toLowerCase().includes('malgun')) ? malgun : helv;
       drawCheck(page, s.x, s.y, s.size||12, s.char || 'V', font);
@@ -357,6 +449,8 @@ exports.handler = async (event) => {
   }
 
   (mapping.lines || []).forEach(s => {
+    if (!isContractPlan && (s.p||1) === 2) return;
+    if ((s.p||1) > pdfDoc.getPageCount()) return;
     const page = pdfDoc.getPage((s.p||1)-1);
     drawLine(page, s.x1, s.y1, s.x2, s.y2, s.w||1);
   });
