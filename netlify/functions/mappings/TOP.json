@@ -212,7 +212,7 @@
       "type": "text"
     },
     "contract_plan_name_p2_21": {
-      "x": 88,
+      "x": -25,
       "y": 346,
       "size": 10,
       "page": 2,
@@ -242,7 +242,7 @@
       "type": "text"
     },
     "contract_discount_p2_24": {
-      "x": 600,
+      "x": 640,
       "y": 346,
       "size": 10,
       "page": 2,
@@ -252,7 +252,7 @@
       "type": "text"
     },
     "contract_basic_payment_p2_25": {
-      "x": 991,
+      "x": 973,
       "y": 351,
       "size": 13,
       "page": 2,
@@ -262,7 +262,7 @@
       "type": "text"
     },
     "contract_basic_payment_p2_26": {
-      "x": 991,
+      "x": 973,
       "y": 495,
       "size": 13,
       "page": 2,
@@ -272,7 +272,7 @@
       "type": "text"
     },
     "contract_penalty_0_3_p2_27": {
-      "x": 999,
+      "x": 991,
       "y": 898,
       "size": 10,
       "page": 2,
@@ -282,7 +282,7 @@
       "type": "text"
     },
     "contract_penalty_4_9_p2_28": {
-      "x": 999,
+      "x": 991,
       "y": 948,
       "size": 10,
       "page": 2,
@@ -292,7 +292,7 @@
       "type": "text"
     },
     "contract_penalty_10_12_p2_29": {
-      "x": 999,
+      "x": 991,
       "y": 998,
       "size": 10,
       "page": 2,
