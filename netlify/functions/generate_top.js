@@ -288,7 +288,8 @@ function deriveContractFields(d) {
   }
   d.contract_plan_name = info.name;
   d.contract_monthly_fee = info.monthly;
-  d.contract_period = info.period;
+  // 약정기간은 PDF 표준안내서의 '개월간 할인' 앞 칸에 숫자만 출력
+  d.contract_period = info.periodMonths || String(info.period || '').replace(/[^0-9]/g, '');
   d.contract_period_months = info.periodMonths;
   d.contract_discount = info.discount;
   d.contract_basic_payment = info.basic;
