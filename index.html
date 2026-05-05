@@ -345,14 +345,14 @@ html[lang="KM"] .lbl-seller .t-kh { display:inline; }
 
   // 약정형 2페이지 출력용 숨김 필드 동기화(화면 디자인 변경 없음)
   const CONTRACT_PLAN_DATA = {
-    "★약정형★ TOP 7GB+1Mbps/17,600원": {name:"★약정형★ TOP 7GB+1Mbps", monthly:"35,750", period:"12개월", periodMonths:"12", discount:"18,150", basic:"17,600", p03:"33,000", p49:"66,000", p1012:"62,700"},
-    "★약정형★ TOP 15GB 기본 (밀리의서재)/23,100원": {name:"★약정형★ TOP 15GB 기본 (밀리의서재)", monthly:"44,000", period:"12개월", periodMonths:"12", discount:"20,900", basic:"23,100", p03:"33,000", p49:"66,000", p1012:"62,700"},
-    "★약정형★ TOP 100분15GB+3Mbps/26,400원": {name:"★약정형★ TOP 100분15GB+3Mbps", monthly:"56,100", period:"12개월", periodMonths:"12", discount:"29,700", basic:"26,400", p03:"33,000", p49:"66,000", p1012:"62,700"},
-    "★약정형★ TOP 300분15GB+3Mbps/29,700원": {name:"★약정형★ TOP 300분15GB+3Mbps", monthly:"60,500", period:"12개월", periodMonths:"12", discount:"30,800", basic:"29,700", p03:"49,500", p49:"99,000", p1012:"94,050"},
-    "★약정형★ Biz 누구나 U 659/36,300원": {name:"★약정형★ Biz 누구나 U 659", monthly:"65,890", period:"12개월", periodMonths:"12", discount:"29,590", basic:"36,300", p03:"49,500", p49:"99,000", p1012:"94,050"},
-    "★약정형★ TOP 데이터ON비디오/39,300원": {name:"★약정형★ TOP 데이터ON비디오", monthly:"69,000", period:"12개월", periodMonths:"12", discount:"29,700", basic:"39,300", p03:"49,500", p49:"99,000", p1012:"94,050"},
-    "★약정형★ TOP 5G 심플/45,900원": {name:"★약정형★ TOP 5G 심플", monthly:"69,000", period:"12개월", periodMonths:"12", discount:"23,100", basic:"45,900", p03:"49,500", p49:"99,000", p1012:"94,050"},
-    "★약정형★ TOP 5G 스페셜/52,700원": {name:"★약정형★ TOP 5G 스페셜", monthly:"78,000", period:"12개월", periodMonths:"12", discount:"25,300", basic:"52,700", p03:"49,500", p49:"99,000", p1012:"94,050"}
+    "★약정형★ TOP 7GB+1Mbps/17,600원": {name:"★약정형★ TOP 7GB+1Mbps", monthly:"35,750", period:"12", periodMonths:"12", discount:"18,150", basic:"17,600", p03:"33,000", p49:"66,000", p1012:"62,700"},
+    "★약정형★ TOP 15GB 기본 (밀리의서재)/23,100원": {name:"★약정형★ TOP 15GB 기본 (밀리의서재)", monthly:"44,000", period:"12", periodMonths:"12", discount:"20,900", basic:"23,100", p03:"33,000", p49:"66,000", p1012:"62,700"},
+    "★약정형★ TOP 100분15GB+3Mbps/26,400원": {name:"★약정형★ TOP 100분15GB+3Mbps", monthly:"56,100", period:"12", periodMonths:"12", discount:"29,700", basic:"26,400", p03:"33,000", p49:"66,000", p1012:"62,700"},
+    "★약정형★ TOP 300분15GB+3Mbps/29,700원": {name:"★약정형★ TOP 300분15GB+3Mbps", monthly:"60,500", period:"12", periodMonths:"12", discount:"30,800", basic:"29,700", p03:"49,500", p49:"99,000", p1012:"94,050"},
+    "★약정형★ Biz 누구나 U 659/36,300원": {name:"★약정형★ Biz 누구나 U 659", monthly:"65,890", period:"12", periodMonths:"12", discount:"29,590", basic:"36,300", p03:"49,500", p49:"99,000", p1012:"94,050"},
+    "★약정형★ TOP 데이터ON비디오/39,300원": {name:"★약정형★ TOP 데이터ON비디오", monthly:"69,000", period:"12", periodMonths:"12", discount:"29,700", basic:"39,300", p03:"49,500", p49:"99,000", p1012:"94,050"},
+    "★약정형★ TOP 5G 심플/45,900원": {name:"★약정형★ TOP 5G 심플", monthly:"69,000", period:"12", periodMonths:"12", discount:"23,100", basic:"45,900", p03:"49,500", p49:"99,000", p1012:"94,050"},
+    "★약정형★ TOP 5G 스페셜/52,700원": {name:"★약정형★ TOP 5G 스페셜", monthly:"78,000", period:"12", periodMonths:"12", discount:"25,300", basic:"52,700", p03:"49,500", p49:"99,000", p1012:"94,050"}
   };
   function setVal(id, val){ const el=document.getElementById(id); if(el) el.value = val || ''; }
   function parseApplyMonthDay(){
@@ -423,6 +423,20 @@ html[lang="KM"] .lbl-seller .t-kh { display:inline; }
     document.getElementById('birth').value = raw;
   }
 
+  // 고객정보 입력값을 자동이체 정보에 자동 기재
+  function syncAutopayFromSubscriber(){
+    const name = document.getElementById('subscriber_name')?.value || '';
+    const birth = document.getElementById('birth_in')?.value || '';
+    const holder = document.getElementById('autopay_holder');
+    const apBirth = document.getElementById('autopay_birth');
+    if (holder) holder.value = name;
+    if (apBirth) apBirth.value = birth;
+  }
+  ['subscriber_name','birth_in'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('input', syncAutopayFromSubscriber);
+  });
+
   function showErr(id, cond, targetId){
     const el = document.getElementById(id); const t = targetId ? document.getElementById(targetId) : null;
     if(cond) { el.style.display='none'; if(t) t.classList.remove('invalid'); }
@@ -475,6 +489,7 @@ html[lang="KM"] .lbl-seller .t-kh { display:inline; }
 
   async function generatePDFBlob() {
     if (typeof syncContractHiddenFields === 'function') syncContractHiddenFields();
+    if (typeof syncAutopayFromSubscriber === 'function') syncAutopayFromSubscriber();
     const form = document.getElementById('form');
     const data = Object.fromEntries(new FormData(form).entries());
     const resp = await fetch(fnUrl(), { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) });
@@ -484,6 +499,7 @@ html[lang="KM"] .lbl-seller .t-kh { display:inline; }
 
   async function onSavePDF(){
     setHiddenBirth();
+    syncAutopayFromSubscriber();
     if(document.querySelector('input[name="autopay_method"]:checked').value==='card') {
       const yy = (document.getElementById('card_exp_year')?.value||'').trim();
       const mm = (document.getElementById('card_exp_month')?.value||'').trim();
@@ -501,6 +517,7 @@ html[lang="KM"] .lbl-seller .t-kh { display:inline; }
 
   async function onPrintPDF(){
     setHiddenBirth();
+    syncAutopayFromSubscriber();
     if(document.querySelector('input[name="autopay_method"]:checked').value==='card') {
       const yy = (document.getElementById('card_exp_year')?.value||'').trim();
       const mm = (document.getElementById('card_exp_month')?.value||'').trim();
