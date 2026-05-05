@@ -7,8 +7,8 @@
     "previewH": 1841,
     "nudgeX": 56.69,
     "nudgeY": -85.04,
-    "scaleX": 1.0,
-    "scaleY": 1.0
+    "scaleX": 1,
+    "scaleY": 1
   },
   "fields": {
     "addr_line1_p1_1": {
@@ -51,17 +51,7 @@
       ],
       "type": "text"
     },
-    "autopay_holder_p1_5": {
-      "x": 697,
-      "y": 451,
-      "size": 10,
-      "page": 1,
-      "source": [
-        "autopay_holder"
-      ],
-      "type": "text"
-    },
-    "autopay_exp_p1_6": {
+    "autopay_exp_p1_5": {
       "x": 1035,
       "y": 371,
       "size": 10,
@@ -71,7 +61,7 @@
       ],
       "type": "text"
     },
-    "autopay_org_p1_7": {
+    "autopay_org_p1_6": {
       "x": 307,
       "y": 371,
       "size": 11,
@@ -81,17 +71,7 @@
       ],
       "type": "text"
     },
-    "autopay_holder_p1_8": {
-      "x": 281,
-      "y": 314,
-      "size": 9,
-      "page": 1,
-      "source": [
-        "autopay_holder"
-      ],
-      "type": "text"
-    },
-    "birth_p1_9": {
+    "birth_p1_7": {
       "x": 822,
       "y": 102,
       "size": 10,
@@ -101,7 +81,7 @@
       ],
       "type": "text"
     },
-    "mvno_name_p1_10": {
+    "mvno_name_p1_8": {
       "x": 1008,
       "y": 621,
       "size": 10,
@@ -111,7 +91,7 @@
       ],
       "type": "text"
     },
-    "plan_p1_11": {
+    "plan_p1_9": {
       "x": 158,
       "y": 145,
       "size": 10,
@@ -121,7 +101,7 @@
       ],
       "type": "text"
     },
-    "port_number_p1_12": {
+    "port_number_p1_10": {
       "x": 218,
       "y": 623,
       "size": 15,
@@ -131,7 +111,7 @@
       ],
       "type": "text"
     },
-    "sim_serial_p1_13": {
+    "sim_serial_p1_11": {
       "x": 162,
       "y": 237,
       "size": 11,
@@ -141,9 +121,9 @@
       ],
       "type": "text"
     },
-    "subscriber_name_p1_14": {
-      "x": 157,
-      "y": 86,
+    "subscriber_name_p1_12": {
+      "x": 697,
+      "y": 451,
       "size": 10,
       "page": 1,
       "source": [
@@ -151,7 +131,7 @@
       ],
       "type": "text"
     },
-    "subscriber_name_p1_15": {
+    "subscriber_name_p1_13": {
       "x": 708,
       "y": 1317,
       "size": 10,
@@ -161,7 +141,7 @@
       ],
       "type": "text"
     },
-    "subscriber_name_p1_16": {
+    "subscriber_name_p1_14": {
       "x": 708,
       "y": 1480,
       "size": 10,
@@ -171,7 +151,7 @@
       ],
       "type": "text"
     },
-    "wish4_p1_17": {
+    "wish4_p1_15": {
       "x": 233,
       "y": 281,
       "size": 11,
@@ -181,13 +161,33 @@
       ],
       "type": "text"
     },
-    "seller_name_p1_18": {
+    "seller_name_p1_16": {
       "x": 799,
       "y": -2,
       "size": 12,
       "page": 1,
       "source": [
         "seller_name"
+      ],
+      "type": "text"
+    },
+    "subscriber_name_p1_17": {
+      "x": 157,
+      "y": 86,
+      "size": 10,
+      "page": 1,
+      "source": [
+        "subscriber_name"
+      ],
+      "type": "text"
+    },
+    "subscriber_name_p1_18": {
+      "x": 281,
+      "y": 314,
+      "size": 10,
+      "page": 1,
+      "source": [
+        "subscriber_name"
       ],
       "type": "text"
     }
