@@ -121,13 +121,13 @@
       ],
       "type": "text"
     },
-    "subscriber_name_p1_12": {
-      "x": 697,
-      "y": 451,
+    "contract_period_p2_12": {
+      "x": 572,
+      "y": 302,
       "size": 10,
-      "page": 1,
+      "page": 2,
       "source": [
-        "subscriber_name"
+        "contract_period"
       ],
       "type": "text"
     },
@@ -188,6 +188,136 @@
       "page": 1,
       "source": [
         "subscriber_name"
+      ],
+      "type": "text"
+    },
+    "subscriber_name_p1_19": {
+      "x": 697,
+      "y": 451,
+      "size": 10,
+      "page": 1,
+      "source": [
+        "subscriber_name"
+      ],
+      "type": "text"
+    },
+    "subscriber_name_p2_20": {
+      "x": 738,
+      "y": 1428,
+      "size": 10,
+      "page": 2,
+      "source": [
+        "subscriber_name"
+      ],
+      "type": "text"
+    },
+    " contract_plan_name_p2_21": {
+      "x": -47,
+      "y": 325,
+      "size": 10,
+      "page": 2,
+      "source": [
+        " contract_plan_name"
+      ],
+      "type": "text"
+    },
+    "contract_monthly_fee_p2_22": {
+      "x": 285,
+      "y": 325,
+      "size": 10,
+      "page": 2,
+      "source": [
+        "contract_monthly_fee"
+      ],
+      "type": "text"
+    },
+    "contract_join_day_p2_23": {
+      "x": 996,
+      "y": 1390,
+      "size": 10,
+      "page": 2,
+      "source": [
+        "contract_join_day"
+      ],
+      "type": "text"
+    },
+    "contract_discount_p2_24": {
+      "x": 554,
+      "y": 353,
+      "size": 10,
+      "page": 2,
+      "source": [
+        "contract_discount"
+      ],
+      "type": "text"
+    },
+    "contract_basic_payment_p2_25": {
+      "x": 872,
+      "y": 353,
+      "size": 10,
+      "page": 2,
+      "source": [
+        "contract_basic_payment"
+      ],
+      "type": "text"
+    },
+    "contract_basic_payment_p2_26": {
+      "x": 872,
+      "y": 503,
+      "size": 10,
+      "page": 2,
+      "source": [
+        "contract_basic_payment"
+      ],
+      "type": "text"
+    },
+    "contract_penalty_0_3_p2_27": {
+      "x": 844,
+      "y": 885,
+      "size": 10,
+      "page": 2,
+      "source": [
+        "contract_penalty_0_3"
+      ],
+      "type": "text"
+    },
+    "contract_penalty_4_9_p2_28": {
+      "x": 844,
+      "y": 950,
+      "size": 10,
+      "page": 2,
+      "source": [
+        "contract_penalty_4_9"
+      ],
+      "type": "text"
+    },
+    "contract_penalty_10_12_p2_29": {
+      "x": 844,
+      "y": 1004,
+      "size": 10,
+      "page": 2,
+      "source": [
+        "contract_penalty_10_12"
+      ],
+      "type": "text"
+    },
+    "contract_seller_name_p2_30": {
+      "x": 46,
+      "y": 1399,
+      "size": 10,
+      "page": 2,
+      "source": [
+        "contract_seller_name"
+      ],
+      "type": "text"
+    },
+    "contract_join_month_p2_31": {
+      "x": 888,
+      "y": 1390,
+      "size": 10,
+      "page": 2,
+      "source": [
+        "contract_join_month"
       ],
       "type": "text"
     }
