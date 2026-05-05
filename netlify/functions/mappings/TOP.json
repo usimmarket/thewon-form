@@ -122,8 +122,8 @@
       "type": "text"
     },
     "contract_period_p2_12": {
-      "x": 572,
-      "y": 302,
+      "x": 570,
+      "y": 305,
       "size": 10,
       "page": 2,
       "source": [
@@ -212,18 +212,18 @@
       "type": "text"
     },
     "contract_plan_name_p2_21": {
-      "x": -47,
-      "y": 325,
+      "x": 88,
+      "y": 346,
       "size": 10,
       "page": 2,
       "source": [
-        " contract_plan_name"
+        "contract_plan_name"
       ],
       "type": "text"
     },
     "contract_monthly_fee_p2_22": {
-      "x": 285,
-      "y": 325,
+      "x": 373,
+      "y": 346,
       "size": 10,
       "page": 2,
       "source": [
@@ -232,8 +232,8 @@
       "type": "text"
     },
     "contract_join_day_p2_23": {
-      "x": 996,
-      "y": 1390,
+      "x": 978,
+      "y": 1386,
       "size": 10,
       "page": 2,
       "source": [
@@ -242,8 +242,8 @@
       "type": "text"
     },
     "contract_discount_p2_24": {
-      "x": 554,
-      "y": 353,
+      "x": 600,
+      "y": 346,
       "size": 10,
       "page": 2,
       "source": [
@@ -252,9 +252,9 @@
       "type": "text"
     },
     "contract_basic_payment_p2_25": {
-      "x": 872,
-      "y": 353,
-      "size": 10,
+      "x": 991,
+      "y": 351,
+      "size": 13,
       "page": 2,
       "source": [
         "contract_basic_payment"
@@ -262,9 +262,9 @@
       "type": "text"
     },
     "contract_basic_payment_p2_26": {
-      "x": 872,
-      "y": 503,
-      "size": 10,
+      "x": 991,
+      "y": 495,
+      "size": 13,
       "page": 2,
       "source": [
         "contract_basic_payment"
@@ -272,8 +272,8 @@
       "type": "text"
     },
     "contract_penalty_0_3_p2_27": {
-      "x": 844,
-      "y": 885,
+      "x": 999,
+      "y": 898,
       "size": 10,
       "page": 2,
       "source": [
@@ -282,8 +282,8 @@
       "type": "text"
     },
     "contract_penalty_4_9_p2_28": {
-      "x": 844,
-      "y": 950,
+      "x": 999,
+      "y": 948,
       "size": 10,
       "page": 2,
       "source": [
@@ -292,8 +292,8 @@
       "type": "text"
     },
     "contract_penalty_10_12_p2_29": {
-      "x": 844,
-      "y": 1004,
+      "x": 999,
+      "y": 998,
       "size": 10,
       "page": 2,
       "source": [
@@ -302,7 +302,7 @@
       "type": "text"
     },
     "contract_seller_name_p2_30": {
-      "x": 46,
+      "x": 63,
       "y": 1399,
       "size": 10,
       "page": 2,
@@ -312,8 +312,8 @@
       "type": "text"
     },
     "contract_join_month_p2_31": {
-      "x": 888,
-      "y": 1390,
+      "x": 891,
+      "y": 1386,
       "size": 10,
       "page": 2,
       "source": [
