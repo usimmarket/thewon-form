@@ -67,12 +67,7 @@ html[lang="KH"] .lbl-seller .t-kh,
 html[lang="km"] .lbl-seller .t-kh,
 html[lang="KM"] .lbl-seller .t-kh { display:inline; }
 
-
-  .addr-search-row{display:flex;gap:8px;align-items:center}
-  .addr-search-row input{flex:1;min-width:0}
-  .addr-search-row .addr-btn{white-space:nowrap;padding:10px 12px;border:1px solid var(--line);background:#f8fafc;color:#0f172a;border-radius:8px;cursor:pointer}
 </style>
-<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 </head>
 <body>
 <header>
@@ -194,10 +189,7 @@ html[lang="KM"] .lbl-seller .t-kh { display:inline; }
         <div class="row">
           <div>
             <label class="req" data-i18n="addr">주소</label>
-            <div class="addr-search-row">
-              <input id="addr_line1" name="addr_line1" type="text" data-i18n-placeholder="addr_ph" placeholder="도로명 주소">
-              <button type="button" id="addrSearchBtn" class="addr-btn" data-i18n="addr_search">주소검색</button>
-            </div>
+            <input id="addr_line1" name="addr_line1" type="text" data-i18n-placeholder="addr_ph" placeholder="도로명 주소">
             <div class="err" id="err_addr">주소를 입력하세요.</div>
           </div>
           <div>
@@ -396,33 +388,6 @@ html[lang="KM"] .lbl-seller .t-kh { display:inline; }
   });
   syncContractHiddenFields();
 
-  // 주소 자동검색: Daum/Kakao 우편번호 서비스
-  function openAddressSearch(){
-    const addrEl = document.getElementById('addr_line1');
-    if (!addrEl) return;
-    if (!window.daum || !window.daum.Postcode) {
-      alert('주소 검색 기능을 불러오지 못했습니다. 인터넷 연결을 확인하거나 주소를 직접 입력해 주세요.');
-      return;
-    }
-    new daum.Postcode({
-      oncomplete: function(data) {
-        let addr = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
-        let extra = '';
-        if (data.userSelectedType === 'R') {
-          if (data.bname && /[동|로|가]$/g.test(data.bname)) extra += data.bname;
-          if (data.buildingName && data.apartment === 'Y') extra += (extra ? ', ' : '') + data.buildingName;
-          if (extra) addr += ' (' + extra + ')';
-        }
-        addrEl.value = addr || '';
-        addrEl.dispatchEvent(new Event('input', { bubbles:true }));
-        addrEl.dispatchEvent(new Event('change', { bubbles:true }));
-        addrEl.focus();
-      }
-    }).open();
-  }
-  const addrSearchBtn = document.getElementById('addrSearchBtn');
-  if (addrSearchBtn) addrSearchBtn.addEventListener('click', openAddressSearch);
-
 
   function updateJoinUI(){
     const isPort = document.querySelector('input[name="join_type"]:checked').value==='port';
@@ -563,8 +528,7 @@ html[lang="KM"] .lbl-seller .t-kh { display:inline; }
       const blob = await generatePDFBlob();
       const url = URL.createObjectURL(blob);
       const w = window.open('', '_blank');
-      w.document.write(`<!doctype html><html><head><title>Print</title><script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-</head>
+      w.document.write(`<!doctype html><html><head><title>Print</title></head>
         <body style="margin:0;background:#111">
           <iframe id="pv" src="${url}" style="border:0;width:100vw;height:100vh"></iframe>
           <script>
@@ -597,7 +561,7 @@ html[lang="KM"] .lbl-seller .t-kh { display:inline; }
       sec_addon:"부가서비스", intl_block:"국제전화 발신 차단", seller_staff_name:"판매자명",
       reset:"초기화", save_pdf:"PDF 저장", print:"인쇄",
       caps_warn:"※대문자로작성/띄워쓰기 확인/오타 유의 해주시길바랍니다.",
-      birth_ph:"6 또는 8자리 숫자", addr_ph:"도로명 주소", addr_search:"주소검색", phone_ph:"숫자만", wish4_ph:"예: 1234"
+      birth_ph:"6 또는 8자리 숫자", addr_ph:"도로명 주소", phone_ph:"숫자만", wish4_ph:"예: 1234"
     },
     US: {
       app_form:"Application Form", partner_only:"For partners",
@@ -611,7 +575,7 @@ html[lang="KM"] .lbl-seller .t-kh { display:inline; }
       sec_addon:"Add-on Service", intl_block:"Block International Outgoing", seller_staff_name:"Salesperson Name",
       reset:"Reset", save_pdf:"Save PDF", print:"Print",
       caps_warn:"Please use UPPERCASE, check spacing, and avoid typos.",
-      birth_ph:"6 or 8 digits", addr_ph:"Street address", addr_search:"Search", phone_ph:"Numbers only", wish4_ph:"Ex: 1234"
+      birth_ph:"6 or 8 digits", addr_ph:"Street address", phone_ph:"Numbers only", wish4_ph:"Ex: 1234"
     },
     VN: {
       app_form:"Đơn đăng ký", partner_only:"Dành cho đại lý",
@@ -625,7 +589,7 @@ html[lang="KM"] .lbl-seller .t-kh { display:inline; }
       sec_addon:"Dịch vụ GTGT", intl_block:"Chặn gọi quốc tế", seller_staff_name:"Tên nhân viên bán hàng",
       reset:"Khởi tạo", save_pdf:"Lưu PDF", print:"In",
       caps_warn:"Vui lòng viết HOA, kiểm tra khoảng trắng và tránh sai chính tả.",
-      birth_ph:"6 hoặc 8 chữ số", addr_ph:"Địa chỉ đường", addr_search:"Tìm địa chỉ", phone_ph:"Chỉ số", wish4_ph:"VD: 1234"
+      birth_ph:"6 hoặc 8 chữ số", addr_ph:"Địa chỉ đường", phone_ph:"Chỉ số", wish4_ph:"VD: 1234"
     },
     TH: {
       app_form:"แบบฟอร์มสมัคร", partner_only:"สำหรับคู่ค้า",
@@ -639,7 +603,7 @@ html[lang="KM"] .lbl-seller .t-kh { display:inline; }
       sec_addon:"บริการเสริม", intl_block:"บล็อกโทรออกต่างประเทศ", seller_staff_name:"ชื่อพนักงานขาย",
       reset:"ล้าง", save_pdf:"บันทึก PDF", print:"พิมพ์",
       caps_warn:"กรุณาพิมพ์ตัวพิมพ์ใหญ่ ตรวจสอบช่องว่าง และหลีกเลี่ยงการสะกดผิด",
-      birth_ph:"ตัวเลข 6 หรือ 8 หลัก", addr_ph:"ที่อยู่ถนน", addr_search:"ค้นหาที่อยู่", phone_ph:"ตัวเลขเท่านั้น", wish4_ph:"เช่น: 1234"
+      birth_ph:"ตัวเลข 6 หรือ 8 หลัก", addr_ph:"ที่อยู่ถนน", phone_ph:"ตัวเลขเท่านั้น", wish4_ph:"เช่น: 1234"
     },
     KH: {
       app_form:"សំណុំបែបបទដាក់ពាក្យ", partner_only:"សម្រាប់ដៃគូ",
@@ -653,7 +617,7 @@ html[lang="KM"] .lbl-seller .t-kh { display:inline; }
       sec_addon:"សេវាបន្ថែម", intl_block:"បិទការហៅចេញអន្តរជាតិ", seller_staff_name:"ឈ្មោះអ្នកលក់",
       reset:"កំណត់ឡើងវិញ", save_pdf:"រក្សាទុក PDF", print:"បោះពុម្ព",
       caps_warn:"សូមប្រើអក្សរធំ ពិនិត្យគន្លឹះវេន និងជៀសវាងកំហុសអក្ខរាវិរុទ្ធ",
-      birth_ph:"៦ ឬ ៨ ខ្ទង់", addr_ph:"អាសយដ្ឋានផ្លូវ", addr_search:"ស្វែងរកអាសយដ្ឋាន", phone_ph:"ត្រឹមតែលេខ", wish4_ph:"ឧ.: 1234"
+      birth_ph:"៦ ឬ ៨ ខ្ទង់", addr_ph:"អាសយដ្ឋានផ្លូវ", phone_ph:"ត្រឹមតែលេខ", wish4_ph:"ឧ.: 1234"
     }
   };
 
