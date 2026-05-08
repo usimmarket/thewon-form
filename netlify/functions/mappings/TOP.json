@@ -122,8 +122,8 @@
       "type": "text"
     },
     "contract_period_p2_12": {
-      "x": 570,
-      "y": 305,
+      "x": 600,
+      "y": 343,
       "size": 10,
       "page": 2,
       "source": [
@@ -242,9 +242,9 @@
       "type": "text"
     },
     "contract_discount_p2_24": {
-      "x": 640,
-      "y": 346,
-      "size": 10,
+      "x": 600,
+      "y": 378,
+      "size": 9,
       "page": 2,
       "source": [
         "contract_discount"
