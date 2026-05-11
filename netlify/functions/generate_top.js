@@ -70,7 +70,6 @@ const WRAP_CONFIG = {
   seller_name:              { maxWidth: 260, lineHeight: 18, maxLines: 2 },
   seller_staff_name:        { maxWidth: 260, lineHeight: 18, maxLines: 2 },
   contract_seller_name:     { maxWidth: 260, lineHeight: 18, maxLines: 2 },
-  addr_line1:               { maxWidth: 420, lineHeight: 18, maxLines: 2 },
   contract_plan_name:       { maxWidth: 360, lineHeight: 18, maxLines: 2 }
 };
 
