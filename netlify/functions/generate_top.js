@@ -236,29 +236,29 @@ function parseIncoming(event) {
 
 /* ===== 약정형 요금제 8종 자동 출력 데이터 ===== */
 const CONTRACT_PLAN_TABLE = {
-  "★약정형★ TOP 7GB+1Mbps/17,600원": {
-    name:"★약정형★ TOP 7GB+1Mbps", monthly:"35,750", period:"12개월간 11,000", periodMonths:"12", discount:"평생할인 7,150", basic:"17,600", p03:"33,000", p49:"66,000", p1012:"62,700"
+  "★약정형★ TOP 7GB 기본_세이브/17,600원": {
+    name:"★약정형★ TOP 7GB 기본_세이브", monthly:"35,750", period:"12개월간 11,000", periodMonths:"12", discount:"평생할인 7,150", basic:"17,600", p03:"33,000", p49:"66,000", p1012:"62,700"
   },
-  "★약정형★ TOP 15GB 기본 (밀리의서재)/23,100원": {
-    name:"★약정형★ TOP 15GB 기본 (밀리의서재)", monthly:"44,000", period:"12개월간 11,000", periodMonths:"12", discount:"평생할인 9,900", basic:"23,100", p03:"33,000", p49:"66,000", p1012:"62,700"
+  "★약정형★ TOP 15GB 기본_세이브/23,100원": {
+    name:"★약정형★ TOP 15GB 기본_세이브", monthly:"44,000", period:"12개월간 11,000", periodMonths:"12", discount:"평생할인 9,900", basic:"23,100", p03:"33,000", p49:"66,000", p1012:"62,700"
   },
-  "★약정형★ TOP 100분15GB+3Mbps/26,400원": {
-    name:"★약정형★ TOP 100분15GB+3Mbps", monthly:"56,100", period:"12개월간 11,000", periodMonths:"12", discount:"평생할인 18,700", basic:"26,400", p03:"33,000", p49:"66,000", p1012:"62,700"
+  "★약정형★ TOP 15GB 100분_세이브/26,400원": {
+    name:"★약정형★ TOP 15GB 100분_세이브", monthly:"56,100", period:"12개월간 11,000", periodMonths:"12", discount:"평생할인 18,700", basic:"26,400", p03:"33,000", p49:"66,000", p1012:"62,700"
   },
-  "★약정형★ TOP 300분15GB+3Mbps/29,700원": {
-    name:"★약정형★ TOP 300분15GB+3Mbps", monthly:"60,500", period:"12개월간 16,500", periodMonths:"12", discount:"평생할인 14,300", basic:"29,700", p03:"49,500", p49:"99,000", p1012:"94,050"
+  "★약정형★ TOP 15GB 300분_세이브/29,700원": {
+    name:"★약정형★ TOP 15GB 300분_세이브", monthly:"60,500", period:"12개월간 16,500", periodMonths:"12", discount:"평생할인 14,300", basic:"29,700", p03:"49,500", p49:"99,000", p1012:"94,050"
   },
-  "★약정형★ Biz 누구나 U 659/36,300원": {
-    name:"★약정형★ Biz 누구나 U 659", monthly:"65,890", period:"12개월간 16,500", periodMonths:"12", discount:"평생할인 13,090", basic:"36,300", p03:"49,500", p49:"99,000", p1012:"94,050"
+  "★약정형★ TOP 11GB 기본_세이브/36,300원": {
+    name:"★약정형★ TOP 11GB 기본_세이브", monthly:"65,890", period:"12개월간 16,500", periodMonths:"12", discount:"평생할인 13,090", basic:"36,300", p03:"49,500", p49:"99,000", p1012:"94,050"
   },
-  "★약정형★ TOP 데이터ON비디오/39,300원": {
-    name:"★약정형★ TOP 데이터ON비디오", monthly:"69,000", period:"12개월간 16,500", periodMonths:"12", discount:"평생할인 13,200", basic:"39,300", p03:"49,500", p49:"99,000", p1012:"94,050"
+  "★약정형★ TOP 100GB 기본_세이브/39,300원": {
+    name:"★약정형★ TOP 100GB 기본_세이브", monthly:"69,000", period:"12개월간 16,500", periodMonths:"12", discount:"평생할인 13,200", basic:"39,300", p03:"49,500", p49:"99,000", p1012:"94,050"
   },
-  "★약정형★ TOP 5G 심플/45,900원": {
-    name:"★약정형★ TOP 5G 심플", monthly:"69,000", period:"12개월간 16,500", periodMonths:"12", discount:"평생할인 6,600", basic:"45,900", p03:"49,500", p49:"99,000", p1012:"94,050"
+  "★약정형★ TOP 5G 110GB 기본_세이브/45,900원": {
+    name:"★약정형★ TOP 5G 110GB 기본_세이브", monthly:"69,000", period:"12개월간 16,500", periodMonths:"12", discount:"평생할인 6,600", basic:"45,900", p03:"49,500", p49:"99,000", p1012:"94,050"
   },
-  "★약정형★ TOP 5G 스페셜/52,700원": {
-    name:"★약정형★ TOP 5G 스페셜", monthly:"78,000", period:"12개월간 16,500", periodMonths:"12", discount:"평생할인 8,800", basic:"52,700", p03:"49,500", p49:"99,000", p1012:"94,050"
+  "★약정형★ TOP 5G 200GB 기본_세이브/52,700원": {
+    name:"★약정형★ TOP 5G 200GB 기본_세이브", monthly:"78,000", period:"12개월간 16,500", periodMonths:"12", discount:"평생할인 8,800", basic:"52,700", p03:"49,500", p49:"99,000", p1012:"94,050"
   }
 };
 function getContractPlanInfo(plan) {
